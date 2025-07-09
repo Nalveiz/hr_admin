@@ -45,7 +45,7 @@ class SidebarMenu extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: AppThemeColors.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -60,8 +60,8 @@ class SidebarMenu extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   AppConstants.appName,
-                  style: AppTextStyles.heading3.copyWith(
-                    color: AppColors.primaryColor,
+                  style: AppThemeTextStyles.of(context).heading3.copyWith(
+                    color: AppThemeColors.of(context).primaryColor,
                   ),
                 ),
               ],
@@ -171,14 +171,14 @@ class SidebarMenu extends StatelessWidget {
                     vertical: 2,
                   ),
                   child: ListTile(
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.logout,
-                      color: AppColors.errorColor,
+                      color: AppThemeColors.of(context).errorColor,
                     ),
                     title: Text(
                       'Çıkış Yap',
-                      style: AppTextStyles.subtitle2.copyWith(
-                        color: AppColors.errorColor,
+                      style: AppThemeTextStyles.of(context).subtitle2.copyWith(
+                        color: AppThemeColors.of(context).errorColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -204,24 +204,29 @@ class SidebarMenu extends StatelessWidget {
     required String route,
     required bool isSelected,
   }) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: ListTile(
         leading: Icon(
           isSelected ? selectedIcon : icon,
-          color: isSelected ? AppColors.primaryColor : AppColors.textSecondary,
+          color: isSelected
+              ? themeColors.primaryColor
+              : themeColors.textSecondary,
         ),
         title: Text(
           title,
-          style: AppTextStyles.subtitle2.copyWith(
+          style: themeTextStyles.subtitle2.copyWith(
             color: isSelected
-                ? AppColors.primaryColor
-                : AppColors.textSecondary,
+                ? themeColors.primaryColor
+                : themeColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
         selected: isSelected,
-        selectedTileColor: AppColors.primaryColor.withValues(alpha: 0.1),
+        selectedTileColor: themeColors.primaryColor.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         onTap: () {
           context.go(route);
@@ -243,7 +248,11 @@ class SidebarMenu extends StatelessWidget {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.logout, color: AppColors.errorColor, size: 24),
+              Icon(
+                Icons.logout,
+                color: AppThemeColors.of(context).errorColor,
+                size: 24,
+              ),
               const SizedBox(width: 8),
               const Text('Çıkış Yap'),
             ],
@@ -256,7 +265,9 @@ class SidebarMenu extends StatelessWidget {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
                 'İptal',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(
+                  color: AppThemeColors.of(context).textSecondary,
+                ),
               ),
             ),
             BlocConsumer<AuthBloc, AuthState>(

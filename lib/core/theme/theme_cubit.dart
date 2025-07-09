@@ -39,10 +39,3 @@ class ThemeCubit extends Cubit<ThemeMode> {
     await prefs.setString(AppConstants.themeKey, themeMode.toString());
   }
 }
-
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(title: Text('WidgetName')),
-    body: Center(child: Text('Hello World!')),
-  );
-}

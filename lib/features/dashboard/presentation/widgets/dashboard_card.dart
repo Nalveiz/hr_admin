@@ -21,6 +21,9 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -47,8 +50,8 @@ class DashboardCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isPositive
-                          ? AppColors.successColor.withValues(alpha: 0.1)
-                          : AppColors.errorColor.withValues(alpha: 0.1),
+                          ? themeColors.successColor.withValues(alpha: 0.1)
+                          : themeColors.errorColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -58,16 +61,16 @@ class DashboardCard extends StatelessWidget {
                           isPositive ? Icons.trending_up : Icons.trending_down,
                           size: 16,
                           color: isPositive
-                              ? AppColors.successColor
-                              : AppColors.errorColor,
+                              ? themeColors.successColor
+                              : themeColors.errorColor,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           trend!,
-                          style: AppTextStyles.caption.copyWith(
+                          style: themeTextStyles.caption.copyWith(
                             color: isPositive
-                                ? AppColors.successColor
-                                : AppColors.errorColor,
+                                ? themeColors.successColor
+                                : themeColors.errorColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -79,13 +82,13 @@ class DashboardCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               value,
-              style: AppTextStyles.heading2.copyWith(
+              style: themeTextStyles.heading2.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
-            Text(title, style: AppTextStyles.body2),
+            Text(title, style: themeTextStyles.body2),
           ],
         ),
       ),

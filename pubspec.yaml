@@ -54,6 +54,4 @@ flutter:
   # Assets
   assets:
     - assets/logo/
-    - assets/images/
-    - assets/icons/
     - assets/animations/

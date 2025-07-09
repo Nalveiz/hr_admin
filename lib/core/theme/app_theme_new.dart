@@ -10,19 +10,24 @@ class AppThemeColors {
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   // Primary Colors
-  Color get primaryColor => _isDark ? AppColors.primaryLight : AppColors.primaryColor;
+  Color get primaryColor =>
+      _isDark ? AppColors.primaryLight : AppColors.primaryColor;
   Color get primaryLight => AppColors.primaryLight;
   Color get primaryDark => AppColors.primaryDark;
 
   // Secondary Colors
-  Color get secondaryColor => _isDark ? AppColors.secondaryLight : AppColors.secondaryColor;
+  Color get secondaryColor =>
+      _isDark ? AppColors.secondaryLight : AppColors.secondaryColor;
   Color get secondaryLight => AppColors.secondaryLight;
   Color get secondaryDark => AppColors.secondaryDark;
 
   // Background Colors
-  Color get backgroundColor => _isDark ? const Color(0xFF121212) : AppColors.backgroundColor;
-  Color get surfaceColor => _isDark ? const Color(0xFF1E1E1E) : AppColors.surfaceColor;
-  Color get cardColor => _isDark ? const Color(0xFF2E2E2E) : AppColors.cardColor;
+  Color get backgroundColor =>
+      _isDark ? const Color(0xFF121212) : AppColors.backgroundColor;
+  Color get surfaceColor =>
+      _isDark ? const Color(0xFF1E1E1E) : AppColors.surfaceColor;
+  Color get cardColor =>
+      _isDark ? const Color(0xFF2E2E2E) : AppColors.cardColor;
 
   // Text Colors
   Color get textPrimary => _isDark ? Colors.white : AppColors.textPrimary;
@@ -53,8 +58,12 @@ class AppThemeColors {
   // Gradients
   LinearGradient get primaryGradient => AppColors.primaryGradient;
   LinearGradient get cardGradient => _isDark
-    ? LinearGradient(colors: [surfaceColor, const Color(0xFF242424)], begin: Alignment.topLeft, end: Alignment.bottomRight)
-    : AppColors.cardGradient;
+      ? LinearGradient(
+          colors: [surfaceColor, const Color(0xFF242424)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        )
+      : AppColors.cardGradient;
 }
 
 // Tema-aware text stiller
@@ -62,18 +71,27 @@ class AppThemeTextStyles {
   final BuildContext context;
 
   const AppThemeTextStyles._(this.context);
-  static AppThemeTextStyles of(BuildContext context) => AppThemeTextStyles._(context);
+  static AppThemeTextStyles of(BuildContext context) =>
+      AppThemeTextStyles._(context);
 
   AppThemeColors get _colors => AppThemeColors.of(context);
 
-  TextStyle get heading1 => AppTextStyles.heading1.copyWith(color: _colors.textPrimary);
-  TextStyle get heading2 => AppTextStyles.heading2.copyWith(color: _colors.textPrimary);
-  TextStyle get heading3 => AppTextStyles.heading3.copyWith(color: _colors.textPrimary);
-  TextStyle get subtitle1 => AppTextStyles.subtitle1.copyWith(color: _colors.textPrimary);
-  TextStyle get subtitle2 => AppTextStyles.subtitle2.copyWith(color: _colors.textPrimary);
-  TextStyle get body1 => AppTextStyles.body1.copyWith(color: _colors.textPrimary);
-  TextStyle get body2 => AppTextStyles.body2.copyWith(color: _colors.textSecondary);
-  TextStyle get caption => AppTextStyles.caption.copyWith(color: _colors.textHint);
+  TextStyle get heading1 =>
+      AppTextStyles.heading1.copyWith(color: _colors.textPrimary);
+  TextStyle get heading2 =>
+      AppTextStyles.heading2.copyWith(color: _colors.textPrimary);
+  TextStyle get heading3 =>
+      AppTextStyles.heading3.copyWith(color: _colors.textPrimary);
+  TextStyle get subtitle1 =>
+      AppTextStyles.subtitle1.copyWith(color: _colors.textPrimary);
+  TextStyle get subtitle2 =>
+      AppTextStyles.subtitle2.copyWith(color: _colors.textPrimary);
+  TextStyle get body1 =>
+      AppTextStyles.body1.copyWith(color: _colors.textPrimary);
+  TextStyle get body2 =>
+      AppTextStyles.body2.copyWith(color: _colors.textSecondary);
+  TextStyle get caption =>
+      AppTextStyles.caption.copyWith(color: _colors.textHint);
   TextStyle get button => AppTextStyles.button;
 }
 

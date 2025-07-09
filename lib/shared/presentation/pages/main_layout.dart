@@ -69,12 +69,14 @@ class MainLayout extends StatelessWidget {
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: AppColors.primaryColor,
+                                  backgroundColor: AppThemeColors.of(
+                                    context,
+                                  ).primaryColor,
                                   child: Text(
                                     'A', // Will be replaced with user initials
-                                    style: AppTextStyles.button.copyWith(
-                                      fontSize: 12,
-                                    ),
+                                    style: AppThemeTextStyles.of(
+                                      context,
+                                    ).button.copyWith(fontSize: 12),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -105,19 +107,23 @@ class MainLayout extends StatelessWidget {
                               ),
                             ),
                             const PopupMenuDivider(),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'logout',
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.logout_outlined,
-                                    color: AppColors.errorColor,
+                                    color: AppThemeColors.of(
+                                      context,
+                                    ).errorColor,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
                                     'Çıkış Yap',
                                     style: TextStyle(
-                                      color: AppColors.errorColor,
+                                      color: AppThemeColors.of(
+                                        context,
+                                      ).errorColor,
                                     ),
                                   ),
                                 ],

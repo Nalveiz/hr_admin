@@ -16,7 +16,7 @@ class AppSnackBar {
     _show(
       context,
       message: message,
-      backgroundColor: AppColors.successColor,
+      backgroundColor: AppThemeColors.of(context).successColor,
       icon: Icons.check_circle_outline,
       duration: duration,
       action: action,
@@ -33,7 +33,7 @@ class AppSnackBar {
     _show(
       context,
       message: message,
-      backgroundColor: AppColors.errorColor,
+      backgroundColor: AppThemeColors.of(context).errorColor,
       icon: Icons.error_outline,
       duration: duration,
       action: action,
@@ -50,7 +50,7 @@ class AppSnackBar {
     _show(
       context,
       message: message,
-      backgroundColor: AppColors.warningColor,
+      backgroundColor: AppThemeColors.of(context).warningColor,
       icon: Icons.warning_outlined,
       duration: duration,
       action: action,
@@ -67,7 +67,7 @@ class AppSnackBar {
     _show(
       context,
       message: message,
-      backgroundColor: AppColors.infoColor,
+      backgroundColor: AppThemeColors.of(context).infoColor,
       icon: Icons.info_outline,
       duration: duration,
       action: action,
@@ -114,7 +114,9 @@ class AppSnackBar {
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.body2.copyWith(color: Colors.white),
+              style: AppThemeTextStyles.of(
+                context,
+              ).body2.copyWith(color: Colors.white),
             ),
           ),
         ],
@@ -150,6 +152,8 @@ class AppDialogs {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        final themeColors = AppThemeColors.of(context);
+
         return AlertDialog(
           title: Row(
             children: [
@@ -159,8 +163,8 @@ class AppDialogs {
                   color:
                       iconColor ??
                       (isDanger
-                          ? AppColors.errorColor
-                          : AppColors.primaryColor),
+                          ? themeColors.errorColor
+                          : themeColors.primaryColor),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -177,7 +181,7 @@ class AppDialogs {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
                 cancelText,
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: themeColors.textSecondary),
               ),
             ),
             isDanger
@@ -240,7 +244,11 @@ class AppDialogs {
           title: Row(
             children: [
               if (icon != null) ...[
-                Icon(icon, color: AppColors.infoColor, size: 24),
+                Icon(
+                  icon,
+                  color: AppThemeColors.of(context).infoColor,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
               ],
               Expanded(child: Text(title)),

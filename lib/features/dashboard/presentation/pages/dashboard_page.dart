@@ -11,8 +11,11 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: themeColors.backgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -34,7 +37,7 @@ class DashboardPage extends StatelessWidget {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: themeColors.primaryColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -47,12 +50,12 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(AppStrings.dashboard, style: AppTextStyles.heading2),
+                Text(AppStrings.dashboard, style: themeTextStyles.heading2),
                 const Spacer(),
                 Text(
                   'Hoş geldiniz, Admin',
-                  style: AppTextStyles.subtitle1.copyWith(
-                    color: AppColors.textSecondary,
+                  style: themeTextStyles.subtitle1.copyWith(
+                    color: themeColors.textSecondary,
                   ),
                 ),
               ],
@@ -82,7 +85,7 @@ class DashboardPage extends StatelessWidget {
                       title: 'Toplam Çalışan',
                       value: '142',
                       icon: Icons.people,
-                      color: AppColors.primaryColor,
+                      color: themeColors.primaryColor,
                       trend: '+5%',
                       isPositive: true,
                     ),
@@ -90,7 +93,7 @@ class DashboardPage extends StatelessWidget {
                       title: 'Bugün Yoklama',
                       value: '138',
                       icon: Icons.access_time,
-                      color: AppColors.successColor,
+                      color: themeColors.successColor,
                       trend: '+2%',
                       isPositive: true,
                     ),
@@ -98,7 +101,7 @@ class DashboardPage extends StatelessWidget {
                       title: 'Bekleyen İzinler',
                       value: '12',
                       icon: Icons.event_note,
-                      color: AppColors.warningColor,
+                      color: themeColors.warningColor,
                       trend: '-8%',
                       isPositive: false,
                     ),
@@ -106,7 +109,7 @@ class DashboardPage extends StatelessWidget {
                       title: 'Bu Ay Bordro',
                       value: '₺425,000',
                       icon: Icons.payments,
-                      color: AppColors.infoColor,
+                      color: themeColors.infoColor,
                       trend: '+3%',
                       isPositive: true,
                     ),

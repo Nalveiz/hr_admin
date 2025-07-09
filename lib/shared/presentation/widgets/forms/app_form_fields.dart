@@ -37,6 +37,8 @@ class AppTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppThemeColors.of(context);
+
     return TextFormField(
       controller: controller,
       validator: validator,
@@ -55,22 +57,22 @@ class AppTextFormField extends StatelessWidget {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderColor, width: 1),
+          borderSide: BorderSide(color: colors.borderColor, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+          borderSide: BorderSide(color: colors.primaryColor, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 1),
+          borderSide: BorderSide(color: colors.errorColor, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 2),
+          borderSide: BorderSide(color: colors.errorColor, width: 2),
         ),
         filled: true,
-        fillColor: AppColors.surfaceColor,
+        fillColor: colors.surfaceColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

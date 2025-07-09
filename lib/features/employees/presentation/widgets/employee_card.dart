@@ -10,6 +10,9 @@ class EmployeeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -25,7 +28,7 @@ class EmployeeCard extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
+                  color: themeColors.primaryColor,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: employee.profileImageUrl != null
@@ -35,17 +38,17 @@ class EmployeeCard extends StatelessWidget {
                           employee.profileImageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              _buildInitials(),
+                              _buildInitials(context),
                         ),
                       )
-                    : _buildInitials(),
+                    : _buildInitials(context),
               ),
               const SizedBox(height: 12),
 
               // Name
               Text(
                 employee.fullName,
-                style: AppTextStyles.subtitle1.copyWith(
+                style: themeTextStyles.subtitle1.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
@@ -57,8 +60,8 @@ class EmployeeCard extends StatelessWidget {
               // Employee ID
               Text(
                 employee.employeeId,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.primaryColor,
+                style: themeTextStyles.caption.copyWith(
+                  color: themeColors.primaryColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -66,7 +69,7 @@ class EmployeeCard extends StatelessWidget {
               // Position
               Text(
                 employee.position,
-                style: AppTextStyles.body2,
+                style: themeTextStyles.body2,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -77,13 +80,13 @@ class EmployeeCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  color: themeColors.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   employee.department,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.primaryColor,
+                  style: themeTextStyles.caption.copyWith(
+                    color: themeColors.primaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -100,18 +103,18 @@ class EmployeeCard extends StatelessWidget {
                     height: 8,
                     decoration: BoxDecoration(
                       color: employee.status == 'active'
-                          ? AppColors.successColor
-                          : AppColors.errorColor,
+                          ? themeColors.successColor
+                          : themeColors.errorColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     employee.status == 'active' ? 'Aktif' : 'Pasif',
-                    style: AppTextStyles.caption.copyWith(
+                    style: themeTextStyles.caption.copyWith(
                       color: employee.status == 'active'
-                          ? AppColors.successColor
-                          : AppColors.errorColor,
+                          ? themeColors.successColor
+                          : themeColors.errorColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -124,11 +127,13 @@ class EmployeeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInitials() {
+  Widget _buildInitials(BuildContext context) {
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return Center(
       child: Text(
         '${employee.firstName.substring(0, 1)}${employee.lastName.substring(0, 1)}',
-        style: AppTextStyles.subtitle1.copyWith(
+        style: themeTextStyles.subtitle1.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),

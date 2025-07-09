@@ -37,19 +37,22 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.isSelected = false,
   }) : elevation = 0,
-       border = const Border.fromBorderSide(
-         BorderSide(color: AppColors.borderColor, width: 1),
-       );
+       border = null;
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final isOutlined = elevation == 0 && border == null;
+
     final cardChild = Container(
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surfaceColor,
+        color: backgroundColor ?? themeColors.surfaceColor,
         borderRadius: borderRadius ?? BorderRadius.circular(12),
         border: isSelected
-            ? Border.all(color: AppColors.primaryColor, width: 2)
+            ? Border.all(color: themeColors.primaryColor, width: 2)
+            : isOutlined
+            ? Border.all(color: themeColors.borderColor, width: 1)
             : border,
         boxShadow: elevation != null && elevation! > 0
             ? [
@@ -100,6 +103,9 @@ class AppHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return AppCard(
       padding: EdgeInsets.zero,
       margin: margin,
@@ -110,7 +116,7 @@ class AppHeaderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: themeColors.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -119,15 +125,15 @@ class AppHeaderCard extends StatelessWidget {
             child: Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, color: AppColors.primaryColor),
+                  Icon(icon, color: themeColors.primaryColor),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: Text(
                     title,
-                    style: AppTextStyles.subtitle1.copyWith(
+                    style: themeTextStyles.subtitle1.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryColor,
+                      color: themeColors.primaryColor,
                     ),
                   ),
                 ),
@@ -166,7 +172,9 @@ class AppStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = color ?? AppColors.primaryColor;
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+    final cardColor = color ?? themeColors.primaryColor;
 
     return AppCard(
       onTap: onTap,
@@ -187,24 +195,24 @@ class AppStatsCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                  style: themeTextStyles.caption.copyWith(
+                    color: themeColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: AppTextStyles.heading3.copyWith(
+                  style: themeTextStyles.heading3.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: themeColors.textPrimary,
                   ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     subtitle!,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
+                    style: themeTextStyles.caption.copyWith(
+                      color: themeColors.textSecondary,
                     ),
                   ),
                 ],
@@ -237,25 +245,30 @@ class AppEmptyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     return AppCard(
       child: Column(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 48, color: AppColors.textSecondary),
+            Icon(icon, size: 48, color: themeColors.textSecondary),
             const SizedBox(height: 16),
           ],
           Text(
             title,
-            style: AppTextStyles.subtitle1.copyWith(
+            style: themeTextStyles.subtitle1.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: themeColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             message,
-            style: AppTextStyles.body2.copyWith(color: AppColors.textSecondary),
+            style: themeTextStyles.body2.copyWith(
+              color: themeColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           if (actionText != null && onAction != null) ...[

@@ -64,9 +64,9 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _getColors();
+    final colors = _getColors(context);
     final padding = _getPadding();
-    final textStyle = _getTextStyle();
+    final textStyle = _getTextStyle(context);
 
     return SizedBox(
       width: width,
@@ -107,29 +107,31 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  _ButtonColors _getColors() {
+  _ButtonColors _getColors(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+
     switch (type) {
       case ButtonType.primary:
         return _ButtonColors(
-          background: AppColors.primaryColor,
+          background: themeColors.primaryColor,
           foreground: Colors.white,
         );
       case ButtonType.secondary:
         return _ButtonColors(
-          background: AppColors.surfaceColor,
-          foreground: AppColors.primaryColor,
-          border: AppColors.primaryColor,
+          background: themeColors.surfaceColor,
+          foreground: themeColors.primaryColor,
+          border: themeColors.primaryColor,
         );
       case ButtonType.danger:
         return _ButtonColors(
-          background: AppColors.errorColor,
+          background: themeColors.errorColor,
           foreground: Colors.white,
         );
       case ButtonType.ghost:
         return _ButtonColors(
           background: Colors.transparent,
-          foreground: AppColors.primaryColor,
-          border: AppColors.primaryColor,
+          foreground: themeColors.primaryColor,
+          border: themeColors.primaryColor,
         );
     }
   }
@@ -145,14 +147,16 @@ class AppButton extends StatelessWidget {
     }
   }
 
-  TextStyle _getTextStyle() {
+  TextStyle _getTextStyle(BuildContext context) {
+    final themeTextStyles = AppThemeTextStyles.of(context);
+
     switch (size) {
       case ButtonSize.small:
-        return AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600);
+        return themeTextStyles.caption.copyWith(fontWeight: FontWeight.w600);
       case ButtonSize.medium:
-        return AppTextStyles.button;
+        return themeTextStyles.button;
       case ButtonSize.large:
-        return AppTextStyles.subtitle1.copyWith(fontWeight: FontWeight.w600);
+        return themeTextStyles.subtitle1.copyWith(fontWeight: FontWeight.w600);
     }
   }
 }
@@ -176,7 +180,7 @@ class AppIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _getColors();
+    final colors = _getColors(context);
 
     return Tooltip(
       message: tooltip ?? '',
@@ -197,29 +201,31 @@ class AppIconButton extends StatelessWidget {
     );
   }
 
-  _ButtonColors _getColors() {
+  _ButtonColors _getColors(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+
     switch (type) {
       case ButtonType.primary:
         return _ButtonColors(
-          background: AppColors.primaryColor,
+          background: themeColors.primaryColor,
           foreground: Colors.white,
         );
       case ButtonType.secondary:
         return _ButtonColors(
-          background: AppColors.surfaceColor,
-          foreground: AppColors.primaryColor,
-          border: AppColors.primaryColor,
+          background: themeColors.surfaceColor,
+          foreground: themeColors.primaryColor,
+          border: themeColors.primaryColor,
         );
       case ButtonType.danger:
         return _ButtonColors(
-          background: AppColors.errorColor,
+          background: themeColors.errorColor,
           foreground: Colors.white,
         );
       case ButtonType.ghost:
         return _ButtonColors(
           background: Colors.transparent,
-          foreground: AppColors.textPrimary,
-          border: AppColors.borderColor,
+          foreground: themeColors.textPrimary,
+          border: themeColors.borderColor,
         );
     }
   }
@@ -244,13 +250,15 @@ class AppFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColors = AppThemeColors.of(context);
+
     if (isExtended && label != null) {
       return FloatingActionButton.extended(
         onPressed: onPressed,
         icon: Icon(icon),
         label: Text(label!),
         tooltip: tooltip,
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: themeColors.primaryColor,
         foregroundColor: Colors.white,
       );
     }
@@ -258,7 +266,7 @@ class AppFab extends StatelessWidget {
     return FloatingActionButton(
       onPressed: onPressed,
       tooltip: tooltip,
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: themeColors.primaryColor,
       foregroundColor: Colors.white,
       child: Icon(icon),
     );
