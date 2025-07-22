@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hr_admin/injection_container.dart';
 import '../../shared.dart';
 import '../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../features/auth/presentation/bloc/auth_event.dart';
-import '../../../features/auth/presentation/bloc/auth_state.dart';
 
 class SidebarMenu extends StatelessWidget {
   const SidebarMenu({super.key});
@@ -239,78 +239,21 @@ class SidebarMenu extends StatelessWidget {
     );
   }
 
-  void _handleLogout(BuildContext context) {
+  void _handleLogout(BuildContext context) async {
     // Show confirmation dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent dismissing by tapping outside
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.logout,
-                color: AppThemeColors.of(context).errorColor,
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              const Text('Çıkış Yap'),
-            ],
-          ),
-          content: const Text(
-            'Oturumunuzu kapatmak istediğinizden emin misiniz?\n\nTüm giriş bilgileriniz silinecek ve login sayfasına yönlendirileceksiniz.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(
-                'İptal',
-                style: TextStyle(
-                  color: AppThemeColors.of(context).textSecondary,
-                ),
-              ),
-            ),
-            BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthUnauthenticated) {
-                  // Dialog'u kapat
-                  Navigator.of(dialogContext).pop();
-                  // Login sayfasına yönlendir
-                  context.go('/login');
-                  // Success message
-                  AppSnackBar.showSuccess(context, 'Başarıyla çıkış yaptınız');
-                }
-                if (state is AuthError) {
-                  // Dialog'u kapat
-                  Navigator.of(dialogContext).pop();
-                  // Error message
-                  AppSnackBar.showError(
-                    context,
-                    'Çıkış yapılırken hata: ${state.message}',
-                  );
-                }
-              },
-              builder: (context, state) {
-                final isLoading = state is AuthLoading;
-
-                return AppButton.danger(
-                  text: 'Çıkış Yap',
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          // Logout işlemi başlat
-                          context.read<AuthBloc>().add(
-                            const AuthLogoutRequested(),
-                          );
-                        },
-                  isLoading: isLoading,
-                  icon: Icons.logout,
-                );
-              },
-            ),
-          ],
-        );
-      },
+    final result = await sl<DialogService>().showConfirmation(
+      context,
+      title: 'Çıkış Yap',
+      message:
+          'Oturumunuzu kapatmak istediğinizden emin misiniz?\n\nTüm giriş bilgileriniz silinecek ve login sayfasına yönlendirileceksiniz.',
+      confirmText: 'Çıkış Yap',
+      cancelText: 'İptal',
+      icon: Icons.logout,
+      isDanger: true,
     );
+
+    if (result == true && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
   }
 }

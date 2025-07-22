@@ -1,9 +1,71 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Ortak Form Field Widget'ı
-/// Tüm projede kullanılacak standart form alanları için
-class AppTextFormField extends StatelessWidget {
+/// Ortak Form Field Widget'ları
+/// Tüm projede kullanılacak standart form alanları için tutarlı tasarım
+
+/// Form field'lar için ortak decoration mixin'i
+mixin _FormFieldDecorationMixin {
+  static const double _borderRadius = 12.0;
+  static const double _borderWidth = 1.0;
+  static const double _focusedBorderWidth = 2.0;
+  static const EdgeInsets _contentPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 14,
+  );
+
+  InputDecoration buildDecoration(
+    BuildContext context, {
+    required String label,
+    String? hint,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    final colors = AppThemeColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        borderSide: BorderSide(
+          color: isDark ? Colors.white38 : colors.borderColor,
+          width: _borderWidth,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        borderSide: BorderSide(
+          color: colors.primaryColor,
+          width: _focusedBorderWidth,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        borderSide: BorderSide(color: colors.errorColor, width: _borderWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        borderSide: BorderSide(
+          color: colors.errorColor,
+          width: _focusedBorderWidth,
+        ),
+      ),
+      filled: true,
+      fillColor: isDark ? const Color(0xFF2A2A2A) : colors.surfaceColor,
+      contentPadding: _contentPadding,
+    );
+  }
+}
+
+/// Standart Text Form Field Widget
+class AppTextFormField extends StatelessWidget with _FormFieldDecorationMixin {
   final String label;
   final String? hint;
   final IconData? prefixIcon;
@@ -37,8 +99,6 @@ class AppTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-
     return TextFormField(
       controller: controller,
       validator: validator,
@@ -49,34 +109,12 @@ class AppTextFormField extends StatelessWidget {
       onTap: onTap,
       onChanged: onChanged,
       readOnly: readOnly,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
+      decoration: buildDecoration(
+        context,
+        label: label,
+        hint: hint,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colors.borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colors.primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colors.errorColor, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colors.errorColor, width: 2),
-        ),
-        filled: true,
-        fillColor: colors.surfaceColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
       ),
     );
   }
@@ -101,7 +139,8 @@ class AppPasswordField extends StatefulWidget {
   State<AppPasswordField> createState() => _AppPasswordFieldState();
 }
 
-class _AppPasswordFieldState extends State<AppPasswordField> {
+class _AppPasswordFieldState extends State<AppPasswordField>
+    with _FormFieldDecorationMixin {
   bool _isVisible = false;
 
   @override
@@ -111,8 +150,9 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
       validator: widget.validator,
       enabled: widget.enabled,
       obscureText: !_isVisible,
-      decoration: InputDecoration(
-        labelText: widget.label,
+      decoration: buildDecoration(
+        context,
+        label: widget.label,
         prefixIcon: const Icon(Icons.lock_outline),
         suffixIcon: IconButton(
           icon: Icon(_isVisible ? Icons.visibility_off : Icons.visibility),
@@ -122,40 +162,17 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
             });
           },
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 2),
-        ),
-        filled: true,
-        fillColor: AppColors.surfaceColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
       ),
     );
   }
 }
 
 /// Date Picker Field Widget
-class AppDateField extends StatelessWidget {
+class AppDateField extends StatelessWidget with _FormFieldDecorationMixin {
   final String label;
   final DateTime? selectedDate;
   final Function(DateTime?) onChanged;
-  final String? Function(DateTime?)? validator;
+  final FormFieldValidator<DateTime>? validator;
   final DateTime? firstDate;
   final DateTime? lastDate;
   final String? hint;
@@ -175,65 +192,57 @@ class AppDateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayText = selectedDate != null
-        ? '${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}'
-        : hint ?? 'Tarih seçin';
+    final colors = AppThemeColors.of(context);
+    final textStyles = AppThemeTextStyles.of(context);
 
-    return InkWell(
-      onTap: () => _selectDate(context),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.borderColor, width: 1),
+    return FormField<DateTime>(
+      validator: validator,
+      initialValue: selectedDate,
+      builder: (field) {
+        final displayText = field.value != null
+            ? '${field.value!.day}.${field.value!.month}.${field.value!.year}'
+            : hint ?? 'Tarih seçin';
+
+        return InkWell(
+          onTap: () => _selectDate(context, field), // ⬅️ Burada field parametresi eklendi
+          child: InputDecorator(
+            decoration: buildDecoration(
+              context,
+              label: label,
+              prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+            ).copyWith(
+              errorText: field.errorText,
+            ),
+            child: Text(
+              displayText,
+              style: field.value != null
+                  ? textStyles.body1
+                  : textStyles.body1.copyWith(color: colors.textSecondary),
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.errorColor, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.errorColor, width: 2),
-          ),
-          filled: true,
-          fillColor: AppColors.surfaceColor,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-        child: Text(
-          displayText,
-          style: selectedDate != null
-              ? AppTextStyles.body1
-              : AppTextStyles.body1.copyWith(color: AppColors.textSecondary),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context, FormFieldState<DateTime> field) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: field.value ?? DateTime.now(),
       firstDate: firstDate ?? DateTime(1950),
       lastDate: lastDate ?? DateTime.now(),
     );
     if (picked != null) {
-      onChanged(picked);
+      onChanged(picked);     // dışarıdan gelen state güncellemesi
+      field.didChange(picked); // form field'a bildir
     }
   }
 }
 
+
 /// Dropdown Field Widget
-class AppDropdownField<T> extends StatelessWidget {
+class AppDropdownField<T> extends StatelessWidget
+    with _FormFieldDecorationMixin {
   final String label;
   final T? value;
   final List<DropdownMenuItem<T>> items;
@@ -260,33 +269,11 @@ class AppDropdownField<T> extends StatelessWidget {
       items: items,
       onChanged: onChanged,
       validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
+      decoration: buildDecoration(
+        context,
+        label: label,
+        hint: hint,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.errorColor, width: 2),
-        ),
-        filled: true,
-        fillColor: AppColors.surfaceColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
       ),
     );
   }

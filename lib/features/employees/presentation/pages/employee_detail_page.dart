@@ -12,23 +12,24 @@ class EmployeeDetailPage extends StatelessWidget {
     // Mock data - In real app, this would come from BLoC
     final employee = Employee(
       id: employeeId,
-      employeeId: 'EMP001',
-      firstName: 'Ahmet',
-      lastName: 'Yılmaz',
+      name: 'Ahmet',
+      surname: 'Yılmaz',
       email: 'ahmet.yilmaz@company.com',
-      phone: '+90 532 123 4567',
-      position: 'Senior Developer',
+      role: 'user',
       department: 'IT',
-      hireDate: DateTime(2022, 1, 15),
-      salary: 15000,
-      status: 'active',
-      birthDate: DateTime(1990, 5, 20),
+      company: 'Tech Company',
+      position: 'Senior Developer',
+      employmentStartDate: DateTime(2022, 1, 15),
+      phone: '+90 532 123 4567',
       address: 'İstanbul, Türkiye',
-      emergencyContact: 'Ayşe Yılmaz - +90 533 987 6543',
+      status: 0,
+      createdAt: DateTime.now(),
+      createdBy: 'admin',
+      note: 'Deneyimli yazılım geliştirici',
     );
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppThemeColors.of(context).backgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -115,17 +116,17 @@ class EmployeeDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(color: Colors.white, width: 4),
                         ),
-                        child: employee.profileImageUrl != null
+                        child: employee.attachment != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(46),
                                 child: Image.network(
-                                  employee.profileImageUrl!,
+                                  employee.attachment!,
                                   fit: BoxFit.cover,
                                 ),
                               )
                             : Center(
                                 child: Text(
-                                  '${employee.firstName.substring(0, 1)}${employee.lastName.substring(0, 1)}',
+                                  '${employee.name.substring(0, 1)}${employee.surname.substring(0, 1)}',
                                   style: AppTextStyles.heading2.copyWith(
                                     color: AppColors.primaryColor,
                                   ),
@@ -136,7 +137,7 @@ class EmployeeDetailPage extends StatelessWidget {
 
                       // Name and Title
                       Text(
-                        employee.fullName,
+                        '${employee.name} ${employee.surname}',
                         style: AppTextStyles.heading2.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -217,20 +218,12 @@ class EmployeeDetailPage extends StatelessWidget {
                   _buildInfoSection(
                     title: 'Kişisel Bilgiler',
                     children: [
-                      _buildInfoRow('Çalışan ID', employee.employeeId),
+                      _buildInfoRow('ID', employee.id ?? '-'),
                       _buildInfoRow('E-posta', employee.email),
                       _buildInfoRow('Telefon', employee.phone),
-                      _buildInfoRow(
-                        'Doğum Tarihi',
-                        employee.birthDate != null
-                            ? '${employee.birthDate!.day}.${employee.birthDate!.month}.${employee.birthDate!.year}'
-                            : '-',
-                      ),
                       _buildInfoRow('Adres', employee.address ?? '-'),
-                      _buildInfoRow(
-                        'Acil Durum Kişisi',
-                        employee.emergencyContact ?? '-',
-                      ),
+                      _buildInfoRow('Not', employee.note ?? '-'),
+                      _buildInfoRow('Rol', employee.role ?? '-'),
                     ],
                   ),
 
@@ -244,16 +237,19 @@ class EmployeeDetailPage extends StatelessWidget {
                       _buildInfoRow('Departman', employee.department),
                       _buildInfoRow(
                         'İşe Başlama Tarihi',
-                        '${employee.hireDate.day}.${employee.hireDate.month}.${employee.hireDate.year}',
-                      ),
-                      _buildInfoRow(
-                        'Maaş',
-                        '₺${employee.salary.toStringAsFixed(0)}',
+                        '${employee.employmentStartDate.day}.${employee.employmentStartDate.month}.${employee.employmentStartDate.year}',
                       ),
                       _buildInfoRow(
                         'Durum',
-                        employee.status == 'active' ? 'Aktif' : 'Pasif',
+                        employee.status == 0 ? 'Aktif' : 'Pasif',
                       ),
+                      _buildInfoRow(
+                        'Oluşturulma Tarihi',
+                        employee.createdAt != null
+                            ? '${employee.createdAt!.day}.${employee.createdAt!.month}.${employee.createdAt!.year}'
+                            : '-',
+                      ),
+                      _buildInfoRow('Oluşturan', employee.createdBy ?? '-'),
                     ],
                   ),
                 ],

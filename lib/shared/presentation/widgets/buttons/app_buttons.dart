@@ -3,7 +3,7 @@ import '../../../../core/theme/app_theme.dart';
 
 /// Primary Button Widget
 class AppButton extends StatelessWidget {
-  final String text;
+  final Text text;
   final VoidCallback? onPressed;
   final bool isLoading;
   final IconData? icon;
@@ -100,7 +100,7 @@ class AppButton extends StatelessWidget {
                     Icon(icon, size: textStyle.fontSize! + 2),
                     const SizedBox(width: 8),
                   ],
-                  Text(text, style: textStyle),
+                  text,
                 ],
               ),
       ),

@@ -8,7 +8,7 @@ class DepartmentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppThemeColors.of(context).backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -16,11 +16,14 @@ class DepartmentsPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(AppStrings.departments, style: AppTextStyles.heading2),
+                Text(
+                  AppStrings.departments,
+                  style: AppThemeTextStyles.of(context).heading2,
+                ),
                 const Spacer(),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Add new department
+                    
                   },
                   icon: const Icon(Icons.add),
                   label: Text(AppStrings.add),
@@ -102,7 +105,7 @@ class DepartmentsPage extends StatelessWidget {
                             const SizedBox(height: 16),
                             Text(
                               dept['name'] as String,
-                              style: AppTextStyles.subtitle1,
+                              style: AppThemeTextStyles.of(context).subtitle1,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),

@@ -1,136 +1,165 @@
 import 'package:equatable/equatable.dart';
 
 class Employee extends Equatable {
-  final String id;
-  final String employeeId;
-  final String firstName;
-  final String lastName;
+  final String? id;
+  final String name;
+  final String surname;
   final String email;
-  final String phone;
-  final String position;
+  final String? role;
+  final String company;
   final String department;
-  final DateTime hireDate;
-  final double salary;
-  final String status;
-  final DateTime? birthDate;
+  final String position;
+  final DateTime employmentStartDate;
+  final String phone;
   final String? address;
-  final String? emergencyContact;
-  final String? profileImageUrl;
+  final String? signature;
+  final String? attachment;
+  final String? note;
+  final int status;
+  final DateTime? createdAt;
+  final String? createdBy;
+  final DateTime? updatedAt;
+  final String? updatedBy;
 
   const Employee({
-    required this.id,
-    required this.employeeId,
-    required this.firstName,
-    required this.lastName,
+    this.id,
+    required this.name,
+    required this.surname,
     required this.email,
-    required this.phone,
-    required this.position,
+    this.role,
     required this.department,
-    required this.hireDate,
-    required this.salary,
-    required this.status,
-    this.birthDate,
+    required this.company,
+    required this.position,
+    required this.employmentStartDate,
+    required this.phone,
     this.address,
-    this.emergencyContact,
-    this.profileImageUrl,
+    this.signature,
+    this.attachment,
+    this.note,
+    required this.status,
+    this.createdAt,
+    this.createdBy,
+    this.updatedAt,
+    this.updatedBy,
   });
 
-  String get fullName => '$firstName $lastName';
+  String get fullName => '$name $surname';
 
   @override
   List<Object?> get props => [
     id,
-    employeeId,
-    firstName,
-    lastName,
+    name,
+    surname,
     email,
-    phone,
-    position,
+    role,
     department,
-    hireDate,
-    salary,
-    status,
-    birthDate,
+    company,
+    position,
+    employmentStartDate,
+    phone,
     address,
-    emergencyContact,
-    profileImageUrl,
+    signature,
+    attachment,
+    note,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
   ];
-
   Employee copyWith({
     String? id,
-    String? employeeId,
-    String? firstName,
-    String? lastName,
+    String? name,
+    String? surname,
     String? email,
-    String? phone,
-    String? position,
+    String? role,
     String? department,
-    DateTime? hireDate,
-    double? salary,
-    String? status,
-    DateTime? birthDate,
+    String? company,
+    String? position,
+    DateTime? employmentStartDate,
+    String? phone,
     String? address,
-    String? emergencyContact,
-    String? profileImageUrl,
+    String? signature,
+    String? attachment,
+    String? note,
+    int? status,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
   }) {
     return Employee(
       id: id ?? this.id,
-      employeeId: employeeId ?? this.employeeId,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
+      name: name ?? this.name,
+      surname: surname ?? this.surname,
       email: email ?? this.email,
-      phone: phone ?? this.phone,
-      position: position ?? this.position,
+      role: role ?? this.role,
       department: department ?? this.department,
-      hireDate: hireDate ?? this.hireDate,
-      salary: salary ?? this.salary,
-      status: status ?? this.status,
-      birthDate: birthDate ?? this.birthDate,
+      company: company ?? this.company,
+      position: position ?? this.position,
+      employmentStartDate: employmentStartDate ?? this.employmentStartDate,
+      phone: phone ?? this.phone,
       address: address ?? this.address,
-      emergencyContact: emergencyContact ?? this.emergencyContact,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      signature: signature ?? this.signature,
+      attachment: attachment ?? this.attachment,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
     );
   }
 
   factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
       id: json['id'],
-      employeeId: json['employeeId'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
+      name: json['name'],
+      surname: json['surname'],
       email: json['email'],
-      phone: json['phone'],
-      position: json['position'],
+      role: json['role'],
+      company: json['company'],
       department: json['department'],
-      hireDate: DateTime.parse(json['hireDate']),
-      salary: (json['salary'] as num).toDouble(),
-      status: json['status'],
-      birthDate: json['birthDate'] != null
-          ? DateTime.parse(json['birthDate'])
-          : null,
+      position: json['position'],
+      employmentStartDate: DateTime.parse(json['employmentStartDate']),
+      phone: json['phone'],
       address: json['address'],
-      emergencyContact: json['emergencyContact'],
-      profileImageUrl: json['profileImageUrl'],
+      signature: json['signature'],
+      attachment: json['attachment'],
+      note: json['note'],
+      status: json['status'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      createdBy: json['createdBy'],
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
+      updatedBy: json['updatedBy'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'employeeId': employeeId,
-      'firstName': firstName,
-      'lastName': lastName,
+      if (id != null) 'id': id,
+      'name': name,
+      'surname': surname,
       'email': email,
-      'phone': phone,
-      'position': position,
+      if (role != null) 'role': role,
       'department': department,
-      'hireDate': hireDate.toIso8601String(),
-      'salary': salary,
+      'company': company,
+      'position': position,
+      'employmentStartDate': employmentStartDate.toIso8601String(),
+      'phone': phone,
+      if (address != null) 'address': address,
+      if (signature != null) 'signature': signature,
+      if (attachment != null) 'attachment': attachment,
+      if (note != null) 'note': note,
       'status': status,
-      'birthDate': birthDate?.toIso8601String(),
-      'address': address,
-      'emergencyContact': emergencyContact,
-      'profileImageUrl': profileImageUrl,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (createdBy != null) 'createdBy': createdBy,
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      if (updatedBy != null) 'updatedBy': updatedBy,
     };
   }
 }

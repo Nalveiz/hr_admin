@@ -68,14 +68,20 @@ class RecentActivities extends StatelessWidget {
           ),
           title: Text(
             activity['title'] as String,
-            style: AppTextStyles.subtitle2,
+            style: AppThemeTextStyles.of(context).subtitle2,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(activity['subtitle'] as String, style: AppTextStyles.body2),
+              Text(
+                activity['subtitle'] as String,
+                style: AppThemeTextStyles.of(context).body2,
+              ),
               const SizedBox(height: 4),
-              Text(activity['time'] as String, style: AppTextStyles.caption),
+              Text(
+                activity['time'] as String,
+                style: AppThemeTextStyles.of(context).caption,
+              ),
             ],
           ),
         );

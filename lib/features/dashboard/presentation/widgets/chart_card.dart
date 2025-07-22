@@ -16,7 +16,7 @@ class ChartCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTextStyles.heading3),
+            Text(title, style: AppThemeTextStyles.of(context).heading3),
             const SizedBox(height: 16),
             child,
           ],

@@ -4,7 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 class EmployeeFilterBar extends StatelessWidget {
   final TextEditingController searchController;
   final String selectedDepartment;
-  final String selectedStatus;
+  final int selectedStatus;
   final ValueChanged<String> onDepartmentChanged;
   final ValueChanged<String> onStatusChanged;
   final ValueChanged<String> onSearchChanged;
@@ -92,7 +92,7 @@ class EmployeeFilterBar extends StatelessWidget {
               // Status Filter
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: selectedStatus,
+                  value: selectedStatus == 0 ? 'Tümü' : selectedStatus == 1 ? 'Aktif' : 'Pasif',
                   decoration: const InputDecoration(
                     labelText: 'Durum',
                     prefixIcon: Icon(Icons.info),

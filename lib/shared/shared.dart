@@ -12,7 +12,9 @@ export 'presentation/widgets/cards/app_cards.dart';
 
 // Utils
 export 'utils/validators.dart';
-export 'utils/app_dialogs.dart';
+export 'utils/snackbar_service.dart';
+export 'utils/dialog_service.dart';
+export 'utils/responsive_utils.dart';
 
 // Constants
 export '../core/constants/app_constants.dart';

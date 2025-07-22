@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hr_admin/injection_container.dart';
 import '../../../../shared/shared.dart';
 import '../../../../core/routing/app_router.dart';
 import '../bloc/auth_bloc.dart';
@@ -33,10 +34,10 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            AppSnackBar.showSuccess(context, 'Başarıyla giriş yaptınız!');
+            sl<SnackBarService>().showSuccess(context, 'Başarıyla giriş yaptınız!');
             context.go(AppRoutes.dashboard);
           } else if (state is AuthError) {
-            AppSnackBar.showError(context, state.message);
+            sl<SnackBarService>().showError(context, state.message);
           }
         },
         child: Container(
@@ -141,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                           final isLoading = state is AuthLoading;
 
                           return AppButton.primary(
-                            text: AppStrings.login,
+                            text: Text(AppStrings.login),
                             onPressed: isLoading ? null : _handleLogin,
                             isLoading: isLoading,
                             width: double.infinity,

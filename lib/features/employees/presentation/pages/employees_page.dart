@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:hr_admin/core/constants/app_constants.dart';
+import 'package:hr_admin/core/theme/app_theme.dart';
+import 'package:hr_admin/features/employees/data/services/employee_service.dart';
+import 'package:hr_admin/injection_container.dart';
 import '../../domain/entities/employee.dart';
 import '../widgets/employee_card.dart';
 import '../widgets/employee_filter_bar.dart';
@@ -16,68 +18,39 @@ class EmployeesPage extends StatefulWidget {
 class _EmployeesPageState extends State<EmployeesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedDepartment = 'Tümü';
-  String _selectedStatus = 'Tümü';
+  int _selectedStatus = 0;
   bool _isGridView = true;
 
-  // Mock data - In real app, this would come from BLoC
-  final List<Employee> _employees = [
-    Employee(
-      id: '1',
-      employeeId: 'EMP001',
-      firstName: 'Ahmet',
-      lastName: 'Yılmaz',
-      email: 'ahmet.yilmaz@company.com',
-      phone: '+90 532 123 4567',
-      position: 'Senior Developer',
-      department: 'IT',
-      hireDate: DateTime(2022, 1, 15),
-      salary: 15000,
-      status: 'active',
-      birthDate: DateTime(1990, 5, 20),
-    ),
-    Employee(
-      id: '2',
-      employeeId: 'EMP002',
-      firstName: 'Fatma',
-      lastName: 'Kaya',
-      email: 'fatma.kaya@company.com',
-      phone: '+90 533 456 7890',
-      position: 'HR Specialist',
-      department: 'HR',
-      hireDate: DateTime(2021, 3, 10),
-      salary: 12000,
-      status: 'active',
-      birthDate: DateTime(1988, 8, 15),
-    ),
-    Employee(
-      id: '3',
-      employeeId: 'EMP003',
-      firstName: 'Mehmet',
-      lastName: 'Demir',
-      email: 'mehmet.demir@company.com',
-      phone: '+90 534 789 0123',
-      position: 'Sales Manager',
-      department: 'Sales',
-      hireDate: DateTime(2020, 6, 5),
-      salary: 18000,
-      status: 'active',
-      birthDate: DateTime(1985, 12, 3),
-    ),
-    Employee(
-      id: '4',
-      employeeId: 'EMP004',
-      firstName: 'Ayşe',
-      lastName: 'Öztürk',
-      email: 'ayse.ozturk@company.com',
-      phone: '+90 535 012 3456',
-      position: 'Marketing Specialist',
-      department: 'Marketing',
-      hireDate: DateTime(2023, 2, 20),
-      salary: 11000,
-      status: 'active',
-      birthDate: DateTime(1992, 4, 10),
-    ),
-  ];
+  late final EmployeeService _employeeService;
+  List<Employee> _employees = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _employeeService = sl<EmployeeService>();
+    _fetchEmployees();
+  }
+
+  Future<void> _fetchEmployees() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    final response = await _employeeService.getEmployees();
+    if (response.isSuccess) {
+      setState(() {
+        _employees = response.data ?? [];
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _error = response.error?.message ?? 'Bilinmeyen hata';
+        _isLoading = false;
+      });
+    }
+  }
 
   List<Employee> get _filteredEmployees {
     return _employees.where((employee) {
@@ -85,7 +58,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           employee.fullName.toLowerCase().contains(
             _searchController.text.toLowerCase(),
           ) ||
-          employee.employeeId.toLowerCase().contains(
+          employee.phone.toLowerCase().contains(
             _searchController.text.toLowerCase(),
           ) ||
           employee.email.toLowerCase().contains(
@@ -97,7 +70,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           employee.department == _selectedDepartment;
 
       final matchesStatus =
-          _selectedStatus == 'Tümü' || employee.status == _selectedStatus;
+          _selectedStatus == 0 || employee.status == _selectedStatus;
 
       return matchesSearch && matchesDepartment && matchesStatus;
     }).toList();
@@ -112,7 +85,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppThemeColors.of(context).backgroundColor,
       body: Column(
         children: [
           // Header
@@ -130,7 +103,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
             ),
             child: Row(
               children: [
-                Text(AppStrings.employees, style: AppTextStyles.heading2),
+                Text(
+                  AppStrings.employees,
+                  style: AppThemeTextStyles.of(context).heading2,
+                ),
                 const Spacer(),
                 IconButton(
                   icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
@@ -164,7 +140,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
             },
             onStatusChanged: (value) {
               setState(() {
-                _selectedStatus = value;
+                _selectedStatus = value == 'Tümü'
+                    ? 0
+                    : value == 'Aktif'
+                    ? 1
+                    : 2;
               });
             },
             onSearchChanged: (value) {
@@ -176,7 +156,13 @@ class _EmployeesPageState extends State<EmployeesPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: _filteredEmployees.isEmpty
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Center(
+                      child: Text(_error!, style: TextStyle(color: Colors.red)),
+                    )
+                  : _filteredEmployees.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -200,10 +186,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   ? GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
+                            crossAxisCount: 4,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.8,
+                            childAspectRatio: 1.2,
                           ),
                       itemCount: _filteredEmployees.length,
                       itemBuilder: (context, index) {
@@ -226,7 +212,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                             leading: CircleAvatar(
                               backgroundColor: AppColors.primaryColor,
                               child: Text(
-                                _filteredEmployees[index].firstName
+                                _filteredEmployees[index].name
                                     .substring(0, 1)
                                     .toUpperCase(),
                                 style: const TextStyle(color: Colors.white),
@@ -242,12 +228,12 @@ class _EmployeesPageState extends State<EmployeesPage> {
                             ),
                             trailing: Chip(
                               label: Text(
-                                _filteredEmployees[index].status == 'active'
+                                _filteredEmployees[index].status == 0
                                     ? 'Aktif'
                                     : 'Pasif',
                               ),
                               backgroundColor:
-                                  _filteredEmployees[index].status == 'active'
+                                  _filteredEmployees[index].status == 0
                                   ? AppColors.successColor.withValues(
                                       alpha: 0.1,
                                     )

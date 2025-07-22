@@ -14,7 +14,6 @@ import '../../features/attendance/presentation/pages/attendance_report_page.dart
 import '../../features/payroll/presentation/pages/payroll_page.dart';
 import '../../features/payroll/presentation/pages/payroll_detail_page.dart'
     as payroll_detail;
-import '../../features/leave/presentation/pages/leave_requests_page.dart';
 import '../../features/leave/presentation/pages/leave_request_detail_page.dart'
     as leave_detail;
 import '../../features/leave/presentation/pages/add_leave_request_page.dart'
@@ -125,7 +124,7 @@ class AppRouter {
           GoRoute(
             path: '/leave-requests',
             name: 'leave-requests',
-            builder: (context, state) => const LeaveRequestsPage(),
+            builder: (context, state) => const add_leave.AddLeaveRequestPage(),
             routes: [
               GoRoute(
                 path: '/add',

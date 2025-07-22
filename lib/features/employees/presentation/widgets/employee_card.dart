@@ -5,8 +5,14 @@ import '../../domain/entities/employee.dart';
 class EmployeeCard extends StatelessWidget {
   final Employee employee;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
 
-  const EmployeeCard({super.key, required this.employee, required this.onTap});
+  const EmployeeCard({
+    super.key,
+    required this.employee,
+    required this.onTap,
+    this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +37,11 @@ class EmployeeCard extends StatelessWidget {
                   color: themeColors.primaryColor,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: employee.profileImageUrl != null
+                child: employee.attachment != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(30),
                         child: Image.network(
-                          employee.profileImageUrl!,
+                          employee.attachment!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               _buildInitials(context),
@@ -57,9 +63,9 @@ class EmployeeCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              // Employee ID
+              // Phone
               Text(
-                employee.employeeId,
+                employee.phone,
                 style: themeTextStyles.caption.copyWith(
                   color: themeColors.primaryColor,
                 ),
@@ -102,7 +108,7 @@ class EmployeeCard extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: employee.status == 'active'
+                      color: employee.status == 0
                           ? themeColors.successColor
                           : themeColors.errorColor,
                       borderRadius: BorderRadius.circular(4),
@@ -110,15 +116,30 @@ class EmployeeCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    employee.status == 'active' ? 'Aktif' : 'Pasif',
+                    employee.status == 0 ? 'Aktif' : 'Pasif',
                     style: themeTextStyles.caption.copyWith(
-                      color: employee.status == 'active'
+                      color: employee.status == 0
                           ? themeColors.successColor
                           : themeColors.errorColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 8),
+              // Düzenle Butonu
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text('Düzenle'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    textStyle: themeTextStyles.caption,
+                  ),
+                  onPressed: onEdit,
+                ),
               ),
             ],
           ),
@@ -132,7 +153,7 @@ class EmployeeCard extends StatelessWidget {
 
     return Center(
       child: Text(
-        '${employee.firstName.substring(0, 1)}${employee.lastName.substring(0, 1)}',
+        '${employee.name.substring(0, 1)}${employee.surname.substring(0, 1)}',
         style: themeTextStyles.subtitle1.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,

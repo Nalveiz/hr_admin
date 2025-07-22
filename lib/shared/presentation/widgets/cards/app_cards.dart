@@ -273,7 +273,7 @@ class AppEmptyCard extends StatelessWidget {
           ),
           if (actionText != null && onAction != null) ...[
             const SizedBox(height: 16),
-            AppButton.primary(text: actionText!, onPressed: onAction),
+            AppButton.primary(text: Text(actionText!), onPressed: onAction),
           ],
         ],
       ),

@@ -9,7 +9,7 @@ class AppConstants {
   static const String logoDensePath = 'assets/logo/logo-dense.png';
 
   // API Constants
-  static const String baseUrl = 'https://app.intimeik.com/api';
+  static const String baseUrl = 'https://localhost:7200';
   static const String loginEndpoint = '/auth/login';
   static const String employeesEndpoint = '/employees';
   static const String departmentsEndpoint = '/departments';
@@ -107,19 +107,19 @@ class AppStrings {
       'Giriş başarısız. Bilgilerinizi kontrol edin.';
 
   // Employee
-  static const String employeeId = 'Çalışan ID';
-  static const String firstName = 'Ad';
-  static const String lastName = 'Soyad';
+  static const String name = 'Ad';
+  static const String surname = 'Soyad';
   static const String email = 'E-posta';
   static const String phone = 'Telefon';
   static const String position = 'Pozisyon';
   static const String department = 'Departman';
-  static const String hireDate = 'İşe Başlama Tarihi';
-  static const String salary = 'Maaş';
+  static const String employmentStartDate = 'İşe Başlama Tarihi';
   static const String status = 'Durum';
-  static const String birthDate = 'Doğum Tarihi';
+  static const String role = 'Rol';
   static const String address = 'Adres';
-  static const String emergencyContact = 'Acil Durum Kişisi';
+  static const String note = 'Not';
+  static const String signature = 'İmza';
+  static const String attachment = 'Ek Dosya';
 
   // Attendance
   static const String checkIn = 'Giriş';

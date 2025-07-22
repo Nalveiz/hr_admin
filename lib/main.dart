@@ -27,7 +27,7 @@ class HRAdminApp extends StatelessWidget {
     providers: [
       BlocProvider<ThemeCubit>(create: (context) => di.sl<ThemeCubit>()),
       BlocProvider<AuthBloc>(
-        create: (context) => AuthBloc(di.sl())..add(const AuthCheckStatus()),
+        create: (context) => di.sl<AuthBloc>()..add(const AuthCheckStatus()),
       ),
     ],
     child: BlocBuilder<ThemeCubit, ThemeMode>(

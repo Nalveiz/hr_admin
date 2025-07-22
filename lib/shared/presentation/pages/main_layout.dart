@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/app_theme.dart';
+import 'package:hr_admin/injection_container.dart';
+import '../../shared.dart';
 import '../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../features/auth/presentation/bloc/auth_state.dart';
@@ -17,9 +17,20 @@ class MainLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        // Eğer logout olduysa login sayfasına yönlendir
         if (state is AuthUnauthenticated) {
+          // Login sayfasına yönlendir
           context.go('/login');
+          // Success message
+          sl<SnackBarService>().showSuccess(
+            context,
+            'Başarıyla çıkış yaptınız',
+          );
+        } else if (state is AuthError) {
+          // Error message
+          sl<SnackBarService>().showError(
+            context,
+            'Çıkış yapılırken hata: ${state.message}',
+          );
         }
       },
       child: Scaffold(
@@ -163,8 +174,21 @@ class MainLayout extends StatelessWidget {
     );
   }
 
-  void _handleLogout(BuildContext context) {
-    // Logout işlemi için AuthBloc'a event gönder
-    context.read<AuthBloc>().add(const AuthLogoutRequested());
+  void _handleLogout(BuildContext context) async {
+    // Show confirmation dialog
+    final result = await sl<DialogService>().showConfirmation(
+      context,
+      title: 'Çıkış Yap',
+      message:
+          'Oturumunuzu kapatmak istediğinizden emin misiniz?\n\nTüm giriş bilgileriniz silinecek ve login sayfasına yönlendirileceksiniz.',
+      confirmText: 'Çıkış Yap',
+      cancelText: 'İptal',
+      icon: Icons.logout,
+      isDanger: true,
+    );
+
+    if (result == true && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
   }
 }

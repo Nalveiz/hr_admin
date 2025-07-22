@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../widgets/dashboard_card.dart';
@@ -65,11 +66,11 @@ class DashboardPage extends StatelessWidget {
             // Stats Cards
             LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth > 1200
+                final crossAxisCount = constraints.maxWidth > 1600
                     ? 4
-                    : constraints.maxWidth > 800
+                    : constraints.maxWidth > 1200
                     ? 3
-                    : constraints.maxWidth > 600
+                    : constraints.maxWidth > 800
                     ? 2
                     : 1;
 
@@ -79,7 +80,7 @@ class DashboardPage extends StatelessWidget {
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 2.5,
+                  childAspectRatio: 2.3,
                   children: [
                     DashboardCard(
                       title: 'Toplam Çalışan',
@@ -175,7 +176,7 @@ class DashboardPage extends StatelessWidget {
                         children: [
                           Text(
                             'Son Aktiviteler',
-                            style: AppTextStyles.heading3,
+                            style: themeTextStyles.heading3,
                           ),
                           const SizedBox(height: 16),
                           const RecentActivities(),
@@ -192,7 +193,10 @@ class DashboardPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Hızlı İşlemler', style: AppTextStyles.heading3),
+                          Text(
+                            'Hızlı İşlemler',
+                            style: themeTextStyles.heading3,
+                          ),
                           const SizedBox(height: 16),
                           _buildQuickActions(context),
                         ],
@@ -308,32 +312,36 @@ class DashboardPage extends StatelessWidget {
           icon: Icons.person_add,
           title: 'Yeni Çalışan',
           onTap: () {
-            // Navigate to add employee
+            context.go('/employees/add');
           },
+          themeTextStyles: AppThemeTextStyles.of(context),
         ),
         const SizedBox(height: 8),
         _buildActionButton(
           icon: Icons.event_note,
           title: 'İzin Talebi',
           onTap: () {
-            // Navigate to leave request
+            context.go('/leave-requests/add');
           },
+          themeTextStyles: AppThemeTextStyles.of(context),
         ),
         const SizedBox(height: 8),
         _buildActionButton(
           icon: Icons.assessment,
           title: 'Rapor Oluştur',
           onTap: () {
-            // Navigate to reports
+            context.go('/reports');
           },
+          themeTextStyles: AppThemeTextStyles.of(context),
         ),
         const SizedBox(height: 8),
         _buildActionButton(
           icon: Icons.access_time,
           title: 'Yoklama Raporu',
           onTap: () {
-            // Navigate to attendance
+            context.go('/attendance/report');
           },
+          themeTextStyles: AppThemeTextStyles.of(context),
         ),
       ],
     );
@@ -343,6 +351,7 @@ class DashboardPage extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required dynamic themeTextStyles,
   }) {
     return InkWell(
       onTap: onTap,
@@ -358,7 +367,7 @@ class DashboardPage extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.primaryColor),
             const SizedBox(width: 12),
-            Text(title, style: AppTextStyles.subtitle2),
+            Text(title, style: themeTextStyles.subtitle2),
             const Spacer(),
             const Icon(Icons.arrow_forward_ios, size: 16),
           ],

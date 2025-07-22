@@ -8,7 +8,7 @@ class AttendancePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppThemeColors.of(context).backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -16,7 +16,10 @@ class AttendancePage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(AppStrings.attendance, style: AppTextStyles.heading2),
+                Text(
+                  AppStrings.attendance,
+                  style: AppThemeTextStyles.of(context).heading2,
+                ),
                 const Spacer(),
                 ElevatedButton.icon(
                   onPressed: () {
@@ -83,7 +86,7 @@ class AttendancePage extends StatelessWidget {
                         children: [
                           Text(
                             'Bugün Yoklama Listesi',
-                            style: AppTextStyles.heading3,
+                            style: AppThemeTextStyles.of(context).heading3,
                           ),
                           const Spacer(),
                           TextButton.icon(

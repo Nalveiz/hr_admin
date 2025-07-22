@@ -1,37 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:hr_admin/injection_container.dart';
-import 'package:hr_admin/features/employees/data/services/employee_service.dart';
+import 'package:hr_admin/features/employees/domain/entities/employee.dart';
 import '../../../../shared/shared.dart';
 
-class AddEmployeePage extends StatefulWidget {
-  const AddEmployeePage({super.key});
+enum EmployeeFormMode { create, edit }
+
+class EmployeeForm extends StatefulWidget {
+  final EmployeeFormMode mode;
+  final Employee? initialData;
+  final void Function(Map<String, dynamic> values) onSubmit;
+  final bool isLoading;
+
+  const EmployeeForm({
+    super.key,
+    required this.mode,
+    this.initialData,
+    required this.onSubmit,
+    this.isLoading = false,
+  });
 
   @override
-  State<AddEmployeePage> createState() => _AddEmployeePageState();
+  State<EmployeeForm> createState() => _EmployeeFormState();
 }
 
-class _AddEmployeePageState extends State<AddEmployeePage> {
+class _EmployeeFormState extends State<EmployeeForm> {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController(); // name
-  final _lastNameController = TextEditingController(); // surname
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _noteController = TextEditingController();
-
-  late final EmployeeService _employeeService;
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _companyController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _noteController;
 
   String _selectedDepartment = 'IT';
   String _selectedRole = 'Employee';
   String _selectedPosition = 'IT';
   DateTime? _employmentStartDate;
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _employeeService = sl<EmployeeService>();
+    final d = widget.initialData;
+    _firstNameController = TextEditingController(text: d?.name ?? '');
+    _lastNameController = TextEditingController(text: d?.surname ?? '');
+    _emailController = TextEditingController(text: d?.email ?? '');
+    _phoneController = TextEditingController(text: d?.phone ?? '');
+    _companyController = TextEditingController(text: d?.company ?? '');
+    _addressController = TextEditingController(text: d?.address ?? '');
+    _noteController = TextEditingController(text: d?.note ?? '');
+    _selectedDepartment = d?.department ?? 'IT';
+    _selectedRole = d?.role ?? 'Employee';
+    _selectedPosition = d?.position ?? 'IT';
+    _employmentStartDate = d?.employmentStartDate;
   }
 
   @override
@@ -49,56 +69,33 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Yeni Çalışan Ekle'),
-        actions: [
-          Padding(
-            padding: responsive.paddingAll(8.0),
-            child: AppButton.primary(
-              text: Text(AppStrings.save),
-              onPressed: _isLoading ? null : _saveEmployee,
-              icon: _isLoading ? null : Icons.save,
-              size: ButtonSize.small,
-            ),
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: responsive.paddingAll(responsive.isMobile ? 16 : 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: responsive.isMobile ? double.infinity : 800,
           ),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Personal Info
+              _buildSectionHeader('Kişisel Bilgiler'),
+              SizedBox(height: responsive.spacing(16)),
+              _buildPersonalInfoSection(responsive),
+              SizedBox(height: responsive.spacing(32)),
+              // Work Info
+              _buildSectionHeader('İş Bilgileri'),
+              SizedBox(height: responsive.spacing(16)),
+              _buildWorkInfoSection(responsive),
+              SizedBox(height: responsive.spacing(32)),
+              // Action Button
+              _buildActionButton(responsive),
+            ],
+          ),
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: responsive.paddingAll(responsive.isMobile ? 16 : 24),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: responsive.isMobile ? double.infinity : 800,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Personal Information Section
-                        _buildSectionHeader('Kişisel Bilgiler'),
-                        SizedBox(height: responsive.spacing(16)),
-                        _buildPersonalInfoSection(responsive),
-                        SizedBox(height: responsive.spacing(32)),
-
-                        // Work Information Section
-                        _buildSectionHeader('İş Bilgileri'),
-                        SizedBox(height: responsive.spacing(16)),
-                        _buildWorkInfoSection(responsive),
-                        SizedBox(height: responsive.spacing(32)),
-
-                        // Action Buttons
-                        _buildActionButtons(responsive),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
     );
   }
 
@@ -112,7 +109,6 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   Widget _buildPersonalInfoSection(ResponsiveUtils responsive) {
     return Column(
       children: [
-        // İsim ve Soyisim - responsive row
         responsive.isMobile
             ? Column(
                 children: [
@@ -274,96 +270,32 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     );
   }
 
-  Widget _buildActionButtons(ResponsiveUtils responsive) {
-    return responsive.isMobile
-        ? Column(
-            children: [
-              AppButton.secondary(
-                text: Text(AppStrings.cancel),
-                onPressed: _isLoading
+  Widget _buildActionButton(ResponsiveUtils responsive) {
+    return AppButton.primary(
+      text: Text(widget.mode == EmployeeFormMode.create ? 'Ekle' : 'Güncelle'),
+      icon: widget.mode == EmployeeFormMode.create ? Icons.save : Icons.edit,
+      onPressed: widget.isLoading
+          ? null
+          : () {
+              if (!_formKey.currentState!.validate()) return;
+              widget.onSubmit({
+                'name': _firstNameController.text.trim(),
+                'surname': _lastNameController.text.trim(),
+                'email': _emailController.text.trim(),
+                'role': _selectedRole,
+                'department': _selectedDepartment,
+                'company': _companyController.text.trim(),
+                'position': _selectedPosition,
+                'employmentStartDate': _employmentStartDate,
+                'phone': _phoneController.text.trim(),
+                'address': _addressController.text.trim().isEmpty
                     ? null
-                    : () => Navigator.of(context).pop(),
-              ),
-              SizedBox(height: responsive.formFieldSpacing),
-              AppButton.primary(
-                text: Text(AppStrings.save),
-                onPressed: _isLoading ? null : _saveEmployee,
-                icon: _isLoading ? null : Icons.save,
-              ),
-            ],
-          )
-        : Row(
-            children: [
-              Expanded(
-                child: AppButton.secondary(
-                  text: Text(AppStrings.cancel),
-                  onPressed: _isLoading
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                ),
-              ),
-              SizedBox(width: responsive.formFieldSpacing),
-              Expanded(
-                child: AppButton.primary(
-                  text: Text(AppStrings.save),
-                  onPressed: _isLoading ? null : _saveEmployee,
-                  icon: _isLoading ? null : Icons.save,
-                ),
-              ),
-            ],
-          );
-  }
-
-  Future<void> _saveEmployee() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (mounted) {
-      setState(() => _isLoading = true);
-    }
-
-    try {
-      final response = await _employeeService.createEmployee(
-        name: _firstNameController.text.trim(),
-        surname: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
-        role: _selectedRole,
-        department: _selectedDepartment,
-        company: _companyController.text.trim(),
-        position: _selectedPosition,
-        employmentStartDate: _employmentStartDate!,
-        phone: _phoneController.text.trim(),
-        address: _addressController.text.trim().isEmpty
-            ? null
-            : _addressController.text.trim(),
-        note: _noteController.text.trim().isEmpty
-            ? null
-            : _noteController.text.trim(),
-      );
-
-      if (!mounted) return;
-
-      if (response.isSuccess) {
-        sl<SnackBarService>().showSuccess(context, 'Çalışan başarıyla eklendi');
-        Navigator.of(
-          context,
-        ).pop(true); // true döndürerek güncelleme sinyali gönder
-      } else {
-        sl<SnackBarService>().showError(
-          context,
-          response.error?.message ?? 'Çalışan eklenirken bir hata oluştu',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        sl<SnackBarService>().showError(
-          context,
-          'Beklenmeyen bir hata oluştu: ${e.toString()}',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+                    : _addressController.text.trim(),
+                'note': _noteController.text.trim().isEmpty
+                    ? null
+                    : _noteController.text.trim(),
+              });
+            },
+    );
   }
 }
