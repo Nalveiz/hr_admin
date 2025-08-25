@@ -18,4 +18,12 @@ export 'utils/responsive_utils.dart';
 
 // Constants
 export '../core/constants/app_constants.dart';
+
+// New API Models - for easy access
+export '../features/companies/data/models/company_model.dart';
+export '../features/departments/data/models/department_model_new.dart';
+export '../features/teams/data/models/team_model.dart';
+export '../features/users/data/models/user_model_new.dart';
+export '../features/leave/data/models/leave_model_new.dart';
+export '../features/permits/data/models/permit_model.dart';
 export '../core/theme/app_theme.dart';

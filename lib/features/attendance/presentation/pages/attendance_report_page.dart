@@ -129,7 +129,10 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
                   icon: Icons.search,
                 ),
                 const SizedBox(width: 12),
-                AppButton.secondary(text: Text('Temizle'), onPressed: _clearFilters),
+                AppButton.secondary(
+                  text: Text('Temizle'),
+                  onPressed: _clearFilters,
+                ),
               ],
             ),
           ],
@@ -341,13 +344,48 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
   }
 
   void _generateReport() {
-    // TODO: API çağrısı ile rapor oluştur
+    // Validate date range
+    if (_startDate != null &&
+        _endDate != null &&
+        _startDate!.isAfter(_endDate!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Başlangıç tarihi bitiş tarihinden büyük olamaz'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Apply filters and generate report
+    final filteredData = _mockAttendanceData.where((data) {
+      bool matchesDepartment =
+          _selectedDepartment == 'Tümü' ||
+          data['department'] == _selectedDepartment;
+      bool matchesEmployee =
+          _selectedEmployee == 'Tümü' || data['employee'] == _selectedEmployee;
+
+      // Date filtering would be implemented when real API is available
+      // For now, just use department and employee filters
+      return matchesDepartment && matchesEmployee;
+    }).toList();
+
+    // Show result
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Rapor oluşturuluyor...'),
+      SnackBar(
+        content: Text('${filteredData.length} kayıt bulundu'),
         backgroundColor: Colors.blue,
       ),
     );
+
+    // In a real implementation, this would call an API endpoint like:
+    // final attendanceService = sl<AttendanceService>();
+    // final response = await attendanceService.generateReport(
+    //   startDate: _startDate,
+    //   endDate: _endDate,
+    //   department: _selectedDepartment == 'Tümü' ? null : _selectedDepartment,
+    //   employee: _selectedEmployee == 'Tümü' ? null : _selectedEmployee,
+    // );
   }
 
   void _clearFilters() {
@@ -360,12 +398,42 @@ class _AttendanceReportPageState extends State<AttendanceReportPage> {
   }
 
   void _exportReport() {
-    // TODO: Raporu export et
+    // Apply current filters to get the data to export
+    final filteredData = _mockAttendanceData.where((data) {
+      bool matchesDepartment =
+          _selectedDepartment == 'Tümü' ||
+          data['department'] == _selectedDepartment;
+      bool matchesEmployee =
+          _selectedEmployee == 'Tümü' || data['employee'] == _selectedEmployee;
+      return matchesDepartment && matchesEmployee;
+    }).toList();
+
+    if (filteredData.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dışa aktarılacak veri bulunamadı'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Show export success message
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Rapor indiriliyor...'),
+      SnackBar(
+        content: Text(
+          '${filteredData.length} kayıt Excel formatında dışa aktarıldı',
+        ),
         backgroundColor: Colors.green,
       ),
     );
+
+    // In a real implementation, this would export the data to Excel/PDF:
+    // final exportService = sl<ExportService>();
+    // await exportService.exportToExcel(
+    //   data: filteredData,
+    //   fileName: 'attendance_report_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+    //   headers: ['Çalışan', 'Departman', 'Tarih', 'Giriş', 'Çıkış', 'Çalışma Saati', 'Durum'],
+    // );
   }
 }

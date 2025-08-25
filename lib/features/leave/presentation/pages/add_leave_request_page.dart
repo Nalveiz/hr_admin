@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hr_admin/features/leave/leave_request_model.dart';
 import '../../../../shared/shared.dart';
 
 class AddLeaveRequestPage extends StatefulWidget {
-  const AddLeaveRequestPage({super.key});
+  final PermissionRequest initialRequest;
+  const AddLeaveRequestPage({super.key, required this.initialRequest});
 
   @override
   State<AddLeaveRequestPage> createState() => _AddLeaveRequestPageState();
@@ -10,12 +12,18 @@ class AddLeaveRequestPage extends StatefulWidget {
 
 class _AddLeaveRequestPageState extends State<AddLeaveRequestPage> {
   final _formKey = GlobalKey<FormState>();
-  final _reasonController = TextEditingController();
+  late PermissionRequest _leaveRequest;
 
   String _selectedLeaveType = 'Yıllık İzin';
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _leaveRequest = widget.initialRequest;
+  }
 
   final List<String> _leaveTypes = [
     'Yıllık İzin',
@@ -28,7 +36,6 @@ class _AddLeaveRequestPageState extends State<AddLeaveRequestPage> {
 
   @override
   void dispose() {
-    _reasonController.dispose();
     super.dispose();
   }
 
@@ -150,7 +157,12 @@ class _AddLeaveRequestPageState extends State<AddLeaveRequestPage> {
                       // Açıklama
                       AppTextFormField(
                         label: 'Açıklama/Gerekçe',
-                        controller: _reasonController,
+                        initialValue: widget.initialRequest.reason,
+                        onChanged: (value) {
+                          setState(() {
+                            _leaveRequest.reason = value;
+                          });
+                        },
                         prefixIcon: Icons.description,
                         maxLines: 4,
                         validator: AppValidators.required,
@@ -238,8 +250,17 @@ class _AddLeaveRequestPageState extends State<AddLeaveRequestPage> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: API çağrısı yapılacak
+      // Simulate API call - in real implementation would call leave service
       await Future.delayed(const Duration(seconds: 1));
+
+      // In a real implementation:
+      // final leaveService = sl<LeaveService>();
+      // final response = await leaveService.createLeaveRequest(
+      //   startDate: _startDate!,
+      //   endDate: _endDate!,
+      //   leaveType: _selectedLeaveType,
+      //   reason: _reasonController.text.trim(),
+      // );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

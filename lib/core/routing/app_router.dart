@@ -4,26 +4,23 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../../features/employees/presentation/pages/employees_page.dart';
-import '../../features/employees/presentation/pages/employee_detail_page.dart';
-import '../../features/employees/presentation/pages/add_employee_page.dart';
+import '../../features/users/presentation/pages/users_page_new.dart';
 import '../../features/departments/presentation/pages/departments_page.dart';
 import '../../features/departments/presentation/pages/department_detail_page.dart';
-import '../../features/attendance/presentation/pages/attendance_page.dart';
-import '../../features/attendance/presentation/pages/attendance_report_page.dart';
-import '../../features/payroll/presentation/pages/payroll_page.dart';
-import '../../features/payroll/presentation/pages/payroll_detail_page.dart'
-    as payroll_detail;
-import '../../features/leave/presentation/pages/leave_request_detail_page.dart'
-    as leave_detail;
-import '../../features/leave/presentation/pages/add_leave_request_page.dart'
-    as add_leave;
-import '../../features/performance/presentation/pages/performance_page.dart';
-import '../../features/performance/presentation/pages/performance_detail_page.dart'
-    as performance_detail;
-import '../../features/reports/presentation/pages/reports_page.dart';
-import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/profile/presentation/pages/profile_page.dart';
+
+// Import active core module pages
+import '../../features/companies/presentation/pages/companies_page.dart';
+import '../../features/teams/presentation/pages/teams_page.dart';
+
+// Import placeholder pages
+import '../../features/attendance/presentation/pages/attendance_page_placeholder.dart';
+import '../../features/payroll/presentation/pages/payroll_page_placeholder.dart';
+import '../../features/leave/presentation/pages/leave_page_placeholder.dart';
+import '../../features/performance/presentation/pages/performance_page_placeholder.dart';
+import '../../features/reports/presentation/pages/reports_page_placeholder.dart';
+import '../../features/settings/presentation/pages/settings_page_placeholder.dart';
+import '../../features/profile/presentation/pages/profile_page_placeholder.dart';
+
 import '../../shared/presentation/pages/main_layout.dart';
 
 /// Ana uygulama router yapılandırması
@@ -50,24 +47,21 @@ class AppRouter {
             builder: (context, state) => const DashboardPage(),
           ),
 
-          // Çalışanlar
+          // Kullanıcılar
           GoRoute(
-            path: '/employees',
-            name: 'employees',
-            builder: (context, state) => const EmployeesPage(),
+            path: '/users',
+            name: 'users',
+            builder: (context, state) => const UsersPageNew(),
             routes: [
               GoRoute(
                 path: '/add',
-                name: 'add-employee',
-                builder: (context, state) => const AddEmployeePage(),
+                name: 'add-user',
+                builder: (context, state) => const UsersPageNew(),
               ),
               GoRoute(
                 path: '/:id',
-                name: 'employee-detail',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return EmployeeDetailPage(employeeId: id);
-                },
+                name: 'user-detail',
+                builder: (context, state) => const UsersPageNew(),
               ),
             ],
           ),
@@ -89,7 +83,45 @@ class AppRouter {
             ],
           ),
 
-          // Devam durumu
+          // Şirketler (Active)
+          GoRoute(
+            path: '/companies',
+            name: 'companies',
+            builder: (context, state) => const CompaniesPage(),
+            routes: [
+              GoRoute(
+                path: '/add',
+                name: 'add-company',
+                builder: (context, state) => const CompaniesPage(),
+              ),
+              GoRoute(
+                path: '/:id',
+                name: 'company-detail',
+                builder: (context, state) => const CompaniesPage(),
+              ),
+            ],
+          ),
+
+          // Takımlar (Active)
+          GoRoute(
+            path: '/teams',
+            name: 'teams',
+            builder: (context, state) => const TeamsPage(),
+            routes: [
+              GoRoute(
+                path: '/add',
+                name: 'add-team',
+                builder: (context, state) => const TeamsPage(),
+              ),
+              GoRoute(
+                path: '/:id',
+                name: 'team-detail',
+                builder: (context, state) => const TeamsPage(),
+              ),
+            ],
+          ),
+
+          // Devam durumu (Placeholder)
           GoRoute(
             path: '/attendance',
             name: 'attendance',
@@ -98,12 +130,12 @@ class AppRouter {
               GoRoute(
                 path: '/report',
                 name: 'attendance-report',
-                builder: (context, state) => const AttendanceReportPage(),
+                builder: (context, state) => const AttendancePage(),
               ),
             ],
           ),
 
-          // Bordro
+          // Bordro (Placeholder)
           GoRoute(
             path: '/payroll',
             name: 'payroll',
@@ -112,38 +144,31 @@ class AppRouter {
               GoRoute(
                 path: '/:id',
                 name: 'payroll-detail',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return payroll_detail.PayrollDetailPage(payrollId: id);
-                },
+                builder: (context, state) => const PayrollPage(),
               ),
             ],
           ),
 
-          // İzin talepleri
+          // İzin talepleri (Placeholder)
           GoRoute(
             path: '/leave-requests',
             name: 'leave-requests',
-            builder: (context, state) => const add_leave.AddLeaveRequestPage(),
+            builder: (context, state) => const LeavePage(),
             routes: [
               GoRoute(
                 path: '/add',
                 name: 'add-leave-request',
-                builder: (context, state) =>
-                    const add_leave.AddLeaveRequestPage(),
+                builder: (context, state) => const LeavePage(),
               ),
               GoRoute(
                 path: '/:id',
                 name: 'leave-request-detail',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return leave_detail.LeaveRequestDetailPage(requestId: id);
-                },
+                builder: (context, state) => const LeavePage(),
               ),
             ],
           ),
 
-          // Performans
+          // Performans (Placeholder)
           GoRoute(
             path: '/performance',
             name: 'performance',
@@ -152,31 +177,26 @@ class AppRouter {
               GoRoute(
                 path: '/:id',
                 name: 'performance-detail',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return performance_detail.PerformanceDetailPage(
-                    performanceId: id,
-                  );
-                },
+                builder: (context, state) => const PerformancePage(),
               ),
             ],
           ),
 
-          // Raporlar
+          // Raporlar (Placeholder)
           GoRoute(
             path: '/reports',
             name: 'reports',
             builder: (context, state) => const ReportsPage(),
           ),
 
-          // Ayarlar
+          // Ayarlar (Placeholder)
           GoRoute(
             path: '/settings',
             name: 'settings',
             builder: (context, state) => const SettingsPage(),
           ),
 
-          // Profil
+          // Profil (Placeholder)
           GoRoute(
             path: '/profile',
             name: 'profile',
@@ -219,9 +239,17 @@ class AppRoutes {
   // Route yolları
   static const String login = '/login';
   static const String dashboard = '/dashboard';
-  static const String employees = '/employees';
-  static const String addEmployee = '/employees/add';
   static const String departments = '/departments';
+
+  // Core active modules
+  static const String companies = '/companies';
+  static const String addCompany = '/companies/add';
+  static const String teams = '/teams';
+  static const String addTeam = '/teams/add';
+  static const String users = '/users';
+  static const String addUser = '/users/add';
+
+  // Placeholder modules
   static const String attendance = '/attendance';
   static const String attendanceReport = '/attendance/report';
   static const String payroll = '/payroll';
@@ -233,8 +261,10 @@ class AppRoutes {
   static const String profile = '/profile';
 
   // Dinamik route'lar
-  static String employeeDetail(String id) => '/employees/$id';
   static String departmentDetail(String id) => '/departments/$id';
+  static String companyDetail(String id) => '/companies/$id';
+  static String teamDetail(String id) => '/teams/$id';
+  static String userDetail(String id) => '/users/$id';
   static String payrollDetail(String id) => '/payroll/$id';
   static String leaveRequestDetail(String id) => '/leave-requests/$id';
   static String performanceDetail(String id) => '/performance/$id';

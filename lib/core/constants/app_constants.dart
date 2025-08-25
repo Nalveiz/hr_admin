@@ -1,6 +1,6 @@
 class AppConstants {
   static const String appName = 'HR Admin';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.0.1'; // Updated for NewLdapApi
 
   // Logo Assets
   static const String logoPath = 'assets/logo/logo.png';
@@ -8,11 +8,26 @@ class AppConstants {
   static const String logoSquarePath = 'assets/logo/logo-square.png';
   static const String logoDensePath = 'assets/logo/logo-dense.png';
 
-  // API Constants
+  // API Constants - Updated for NewLdapApi v1
   static const String baseUrl = 'https://localhost:7200';
+  static const String apiVersion = 'v1';
+
+  // Auth Endpoints
   static const String loginEndpoint = '/auth/login';
+  static const String refreshTokenEndpoint = '/Auth/refresh-token';
+  static const String logoutEndpoint = '/Auth/logout';
+  static const String profileEndpoint = '/auth/me';
+
+  // New API Endpoints
+  static const String companiesEndpoint = '/company';
+  static const String departmentsEndpoint = '/department';
+  static const String teamsEndpoint = '/team';
+  static const String usersEndpoint = '/user';
   static const String employeesEndpoint = '/employees';
-  static const String departmentsEndpoint = '/departments';
+  static const String leavesEndpoint = '/api/Leave';
+  static const String permitsEndpoint = '/permits';
+
+  // Legacy Endpoints (for backward compatibility)
   static const String attendanceEndpoint = '/attendance';
   static const String payrollEndpoint = '/payroll';
   static const String leaveRequestsEndpoint = '/leave-requests';
@@ -20,6 +35,7 @@ class AppConstants {
 
   // Storage Keys
   static const String authTokenKey = 'auth_token';
+  static const String refreshTokenKey = 'refresh_token';
   static const String userDataKey = 'user_data';
   static const String themeKey = 'theme_mode';
 

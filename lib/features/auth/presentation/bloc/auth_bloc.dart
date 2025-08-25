@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hr_admin/features/auth/data/services/auth_service.dart';
+import 'package:hr_admin/features/auth/data/models/user_model.dart';
+import 'package:hr_admin/features/auth/data/services/auth_service_new.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import 'auth_event.dart';
@@ -22,23 +25,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final token = _prefs.getString(AppConstants.authTokenKey);
       final userDataString = _prefs.getString(AppConstants.userDataKey);
+      final refreshToken = _prefs.getString(AppConstants.refreshTokenKey);
 
-      if (token != null && userDataString != null) {
-        // In a real app, you would validate the token with the server
-        final userData = <String, dynamic>{
-          'id': '1',
-          'username': 'admin',
-          'email': 'admin@company.com',
-          'firstName': 'Admin',
-          'lastName': 'User',
-          'role': 'admin',
-        };
+      print('Token: $token');
+      print('User Data: $userDataString');
+      print('Refresh Token: $refreshToken');
 
-        emit(AuthAuthenticated(token: token, user: userData));
+      if (token != null && userDataString != null && refreshToken != null) {
+        final Map<String, dynamic> userMap = jsonDecode(userDataString);
+        final user = UserModel.fromJson(userMap);
+
+        emit(
+          AuthAuthenticated(
+            token: token,
+            user: user,
+            refreshToken: refreshToken,
+          ),
+        );
       } else {
         emit(const AuthUnauthenticated());
       }
     } catch (e) {
+      print('Error in _onCheckStatus: $e');
       emit(AuthError(message: e.toString()));
     }
   }
@@ -51,25 +59,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       final response = await _authService.login(
-        email: event.username,
+        username: event.username,
         password: event.password,
-        rememberMe: event.rememberMe,
       );
       if (!response.isSuccess || response.data == null) {
-        emit(AuthError(message: response.error?.message ?? 'Login failed'));
+        emit(AuthError(message: response.error ?? 'Login failed'));
         return;
-      } else {
-        final token = response.data!.token;
-        final userData = response.data!.user;
-
-        await _prefs.setString(AppConstants.authTokenKey, token);
-        await _prefs.setString(
-          AppConstants.userDataKey,
-          userData.toJson().toString(),
-        );
-
-        emit(AuthAuthenticated(token: token, user: userData.toJson()));
       }
+      final tokens = response.data!.tokens;
+      final user = response.data!.user;
+      final userJson = jsonEncode(user.toJson());
+      await _prefs.setString(AppConstants.userDataKey, userJson);
+
+      await _prefs.setString(AppConstants.refreshTokenKey, tokens.refreshToken);
+      await _prefs.setString(AppConstants.authTokenKey, tokens.accessToken);
+
+      emit(
+        AuthAuthenticated(
+          token: tokens.accessToken,
+          user: user,
+          refreshToken: tokens.refreshToken,
+        ),
+      );
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
@@ -80,6 +91,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
+      await _authService.logout();
       await _prefs.remove(AppConstants.authTokenKey);
       await _prefs.remove(AppConstants.userDataKey);
 

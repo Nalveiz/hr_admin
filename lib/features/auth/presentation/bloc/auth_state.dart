@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hr_admin/features/auth/data/models/user_model.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -17,12 +18,13 @@ class AuthLoading extends AuthState {
 
 class AuthAuthenticated extends AuthState {
   final String token;
-  final Map<String, dynamic> user;
+  final UserModel user;
+  final String refreshToken;
 
-  const AuthAuthenticated({required this.token, required this.user});
+  const AuthAuthenticated({required this.token, required this.user, required this.refreshToken});
 
   @override
-  List<Object?> get props => [token, user];
+  List<Object?> get props => [token, user, refreshToken];
 }
 
 class AuthUnauthenticated extends AuthState {

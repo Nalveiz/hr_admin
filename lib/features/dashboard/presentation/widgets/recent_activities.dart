@@ -9,7 +9,7 @@ class RecentActivities extends StatelessWidget {
     final activities = [
       {
         'icon': Icons.person_add,
-        'title': 'Yeni çalışan eklendi',
+        'title': 'Yeni kullanici eklendi',
         'subtitle': 'Ahmet Yılmaz - IT Departmanı',
         'time': '5 dakika önce',
         'color': AppColors.successColor,

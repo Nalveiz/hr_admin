@@ -34,11 +34,11 @@ class ReportsPage extends StatelessWidget {
               children: [
                 _buildReportCard(
                   context,
-                  'Çalışan Raporları',
-                  'Çalışan listesi ve detayları',
+                  'Kullanici Raporlari',
+                  'Kullanici listesi ve detaylari',
                   Icons.people,
                   AppColors.primaryColor,
-                  () => _generateEmployeeReport(context),
+                  () => _generateUserReport(context),
                 ),
                 _buildReportCard(
                   context,
@@ -67,7 +67,7 @@ class ReportsPage extends StatelessWidget {
                 _buildReportCard(
                   context,
                   'Performans Raporları',
-                  'Çalışan performans değerlendirmeleri',
+                  'Kullanici performans degerlendirmeleri',
                   Icons.assessment,
                   AppColors.errorColor,
                   () => _generatePerformanceReport(context),
@@ -137,8 +137,8 @@ class ReportsPage extends StatelessWidget {
     );
   }
 
-  void _generateEmployeeReport(BuildContext context) {
-    _showComingSoonDialog(context, 'Çalışan Raporu');
+  void _generateUserReport(BuildContext context) {
+    _showComingSoonDialog(context, 'Kullanici Raporu');
   }
 
   void _generateAttendanceReport(BuildContext context) {

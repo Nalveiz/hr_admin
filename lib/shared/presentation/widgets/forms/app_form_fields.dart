@@ -68,6 +68,7 @@ mixin _FormFieldDecorationMixin {
 class AppTextFormField extends StatelessWidget with _FormFieldDecorationMixin {
   final String label;
   final String? hint;
+  final String? initialValue;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final TextEditingController? controller;
@@ -87,6 +88,7 @@ class AppTextFormField extends StatelessWidget with _FormFieldDecorationMixin {
     this.prefixIcon,
     this.suffixIcon,
     this.controller,
+    this.initialValue,
     this.validator,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
@@ -101,6 +103,7 @@ class AppTextFormField extends StatelessWidget with _FormFieldDecorationMixin {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      initialValue: initialValue,
       validator: validator,
       obscureText: obscureText,
       keyboardType: keyboardType,
@@ -204,15 +207,16 @@ class AppDateField extends StatelessWidget with _FormFieldDecorationMixin {
             : hint ?? 'Tarih seçin';
 
         return InkWell(
-          onTap: () => _selectDate(context, field), // ⬅️ Burada field parametresi eklendi
+          onTap: () => _selectDate(
+            context,
+            field,
+          ), // ⬅️ Burada field parametresi eklendi
           child: InputDecorator(
             decoration: buildDecoration(
               context,
               label: label,
               prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-            ).copyWith(
-              errorText: field.errorText,
-            ),
+            ).copyWith(errorText: field.errorText),
             child: Text(
               displayText,
               style: field.value != null
@@ -225,7 +229,10 @@ class AppDateField extends StatelessWidget with _FormFieldDecorationMixin {
     );
   }
 
-  Future<void> _selectDate(BuildContext context, FormFieldState<DateTime> field) async {
+  Future<void> _selectDate(
+    BuildContext context,
+    FormFieldState<DateTime> field,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: field.value ?? DateTime.now(),
@@ -233,12 +240,11 @@ class AppDateField extends StatelessWidget with _FormFieldDecorationMixin {
       lastDate: lastDate ?? DateTime.now(),
     );
     if (picked != null) {
-      onChanged(picked);     // dışarıdan gelen state güncellemesi
+      onChanged(picked); // dışarıdan gelen state güncellemesi
       field.didChange(picked); // form field'a bildir
     }
   }
 }
-
 
 /// Dropdown Field Widget
 class AppDropdownField<T> extends StatelessWidget
@@ -250,6 +256,7 @@ class AppDropdownField<T> extends StatelessWidget
   final String? Function(T?)? validator;
   final IconData? prefixIcon;
   final String? hint;
+  final Function()? onTap;
 
   const AppDropdownField({
     super.key,
@@ -260,6 +267,7 @@ class AppDropdownField<T> extends StatelessWidget
     this.validator,
     this.prefixIcon,
     this.hint,
+    this.onTap,
   });
 
   @override
@@ -267,6 +275,7 @@ class AppDropdownField<T> extends StatelessWidget
     return DropdownButtonFormField<T>(
       value: value,
       items: items,
+      onTap: onTap,
       onChanged: onChanged,
       validator: validator,
       decoration: buildDecoration(

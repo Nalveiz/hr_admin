@@ -1,306 +1,160 @@
-import 'package:hr_admin/core/services/http_service.dart';
+// import '../../../../core/network/base_http_service.dart';
+// import '../../../../core/network/api_endpoints.dart';
+// import '../../../../core/network/api_response.dart';
+// import '../models/login_models.dart';
+// import '../models/user_model.dart';
+// import '../models/auth_tokens_model.dart';
 
-/// Authentication için DTO modelleri
-class LoginRequest {
-  final String Username;
-  final String Password;
-  final bool rememberMe;
+// /// Authentication service for handling auth operations
+// class AuthService extends BaseHttpService {
+//   AuthService(super.prefs);
 
-  LoginRequest({
-    required this.Username,
-    required this.Password,
-    this.rememberMe = false,
-  });
+//   /// Login with username and password
+//   Future<ApiResponse<LoginResponse>> login({
+//     required String username,
+//     required String password,
+//     bool rememberMe = false,
+//   }) async {
+//     final loginRequest = LoginRequest(
+//       username: username,
+//       password: password,
+//       platform: "web",
+//     );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'Username': Username,
-      'Password': Password,
-      'RememberMe': rememberMe,
-    };
-  }
-}
+//     final response = await post<LoginResponse>(
+//       ApiEndpoints.login,
+//       data: loginRequest.toJson(),
+//       fromJson: (json) => LoginResponse.fromJson(json),
+//     );
 
-class LoginResponse {
-  final String token;
-  final String refreshToken;
-  final UserInfo user;
-  final DateTime expiresAt;
+//     // Store tokens if login successful
+//     if (response.isSuccess && response.data != null) {
+//       await _storeTokens(response.data!.tokens);
+//     }
 
-  LoginResponse({
-    required this.token,
-    required this.refreshToken,
-    required this.user,
-    required this.expiresAt,
-  });
+//     return response;
+//   }
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
-    return LoginResponse(
-      token: json['token'] ?? json['accessToken'] ?? '',
-      refreshToken: json['refreshToken'] ?? '',
-      user: UserInfo.fromJson(json['user'] ?? json),
-      expiresAt: DateTime.parse(
-        json['expiresAt'] ?? json['expiry'] ?? DateTime.now().toIso8601String(),
-      ),
-    );
-  }
-}
+//   /// Refresh access token
+//   Future<ApiResponse<AuthTokensModel>> refreshToken() async {
+//     final refreshToken = prefs.getString('refresh_token');
+//     if (refreshToken == null) {
+//       return ApiResponse.error('No refresh token available');
+//     }
 
-class UserInfo {
-  final String id;
-  final String email;
-  final String firstName;
-  final String lastName;
-  final String role;
-  final List<String> permissions;
+//     final response = await post<AuthTokensModel>(
+//       ApiEndpoints.refreshToken,
+//       data: {'refreshToken': refreshToken},
+//       fromJson: (json) => AuthTokensModel.fromJson(json),
+//     );
 
-  UserInfo({
-    required this.id,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.role,
-    this.permissions = const [],
-  });
+//     // Store new tokens if refresh successful
+//     if (response.isSuccess && response.data != null) {
+//       await _storeTokens(response.data!);
+//     }
 
-  factory UserInfo.fromJson(Map<String, dynamic> json) {
-    return UserInfo(
-      id: json['id'] ?? '',
-      email: json['email'] ?? '',
-      firstName: json['firstName'] ?? json['name']?.split(' ')[0] ?? '',
-      lastName:
-          json['lastName'] ?? json['name']?.split(' ').skip(1).join(' ') ?? '',
-      role: json['role'] ?? 'user',
-      permissions:
-          (json['permissions'] as List<dynamic>?)?.cast<String>() ?? [],
-    );
-  }
+//     return response;
+//   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
-      'role': role,
-      'permissions': permissions,
-    };
-  }
+//   /// Get current user profile
+//   Future<ApiResponse<UserModel>> getProfile() async {
+//     return await get<UserModel>(
+//       ApiEndpoints.profile,
+//       fromJson: (json) => UserModel.fromJson(json),
+//     );
+//   }
 
-  String get fullName => '$firstName $lastName'.trim();
-}
+//   /// Update user profile
+//   Future<ApiResponse<UserModel>> updateProfile({
+//     required String fullName,
+//     String? phone,
+//     String? profileImage,
+//   }) async {
+//     return await put<UserModel>(
+//       ApiEndpoints.profile,
+//       data: {
+//         'fullName': fullName,
+//         'phone': phone,
+//         'profileImage': profileImage,
+//       },
+//       fromJson: (json) => UserModel.fromJson(json),
+//     );
+//   }
 
-/// Authentication API işlemleri için service
-class AuthService {
-  final HttpService _httpService;
+//   /// Logout user
+//   Future<ApiResponse<void>> logout() async {
+//     final response = await post<void>(ApiEndpoints.logout);
 
-  AuthService(this._httpService);
+//     // Clear stored tokens regardless of response
+//     await _clearTokens();
 
-  /// Login işlemi
-  Future<HttpResponse<LoginResponse>> login({
-    required String email,
-    required String password,
-    bool rememberMe = false,
-  }) async {
-    final request = LoginRequest(
-      Username: email,
-      Password: password,
-      rememberMe: rememberMe,
-    );
+//     return response;
+//   }
 
-    final response = await _httpService.post<LoginResponse>(
-      '/auth/login-admin',
-      body: request.toJson(),
-      fromJson: (json) => LoginResponse.fromJson(json),
-    );
+//   /// Check if user is authenticated
+//   bool isAuthenticated() {
+//     final accessToken = prefs.getString('access_token');
+//     return accessToken != null && accessToken.isNotEmpty;
+//   }
 
-    // Başarılı login'de token'ı kaydet
-    if (response.isSuccess && response.data != null) {
-      await _httpService.saveToken(response.data!.token);
-    }
+//   /// Get stored access token
+//   String? getAccessToken() {
+//     return prefs.getString('access_token');
+//   }
 
-    return response;
-  }
+//   /// Get stored refresh token
+//   String? getRefreshToken() {
+//     return prefs.getString('refresh_token');
+//   }
 
-  /// Logout işlemi
-  Future<HttpResponse<void>> logout() async {
-    final response = await _httpService.post<void>('/auth/logout');
+//   /// Store authentication tokens
+//   Future<void> _storeTokens(AuthTokensModel tokens) async {
+//     await prefs.setString('access_token', tokens.accessToken);
+//     await prefs.setString('refresh_token', tokens.refreshToken);
+//     await prefs.setString('token_type', tokens.tokenType);
+//     await prefs.setInt('expires_in', tokens.expiresIn);
+//     await prefs.setString('expires_at', tokens.expiresAt.toIso8601String());
+//   }
 
-    // Token'ı temizle
-    await _httpService.clearToken();
+//   /// Clear stored tokens
+//   Future<void> _clearTokens() async {
+//     await prefs.remove('access_token');
+//     await prefs.remove('refresh_token');
+//     await prefs.remove('token_type');
+//     await prefs.remove('expires_in');
+//     await prefs.remove('expires_at');
+//     await prefs.remove('user_data');
+//   }
 
-    return response;
-  }
+//   /// Store user data
+//   Future<void> storeUserData(UserModel user) async {
+//     await prefs.setString('user_data', user.toJson().toString());
+//   }
 
-  /// Token'ı yenile
-  Future<HttpResponse<LoginResponse>> refreshToken(String refreshToken) async {
-    final body = {'refreshToken': refreshToken};
+//   /// Check if token is expired
+//   bool isTokenExpired() {
+//     final expiresAtString = prefs.getString('expires_at');
+//     if (expiresAtString == null) return true;
 
-    final response = await _httpService.post<LoginResponse>(
-      '/auth/refresh',
-      body: body,
-      fromJson: (json) => LoginResponse.fromJson(json),
-    );
+//     try {
+//       final expiresAt = DateTime.parse(expiresAtString);
+//       return DateTime.now().isAfter(expiresAt);
+//     } catch (e) {
+//       return true;
+//     }
+//   }
 
-    // Başarılı refresh'de yeni token'ı kaydet
-    if (response.isSuccess && response.data != null) {
-      await _httpService.saveToken(response.data!.token);
-    }
+//   /// Check if token is near expiry (within 5 minutes)
+//   bool isTokenNearExpiry() {
+//     final expiresAtString = prefs.getString('expires_at');
+//     if (expiresAtString == null) return true;
 
-    return response;
-  }
-
-  /// Mevcut kullanıcı bilgilerini getirir
-  Future<HttpResponse<UserInfo>> getCurrentUser() async {
-    final response = await _httpService.get<UserInfo>(
-      '/auth/me',
-      fromJson: (json) => UserInfo.fromJson(json),
-    );
-
-    return response;
-  }
-
-  /// Şifre değiştirme
-  Future<HttpResponse<void>> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    final body = {
-      'currentPassword': currentPassword,
-      'newPassword': newPassword,
-    };
-
-    final response = await _httpService.post<void>(
-      '/auth/change-password',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// Şifre sıfırlama isteği
-  Future<HttpResponse<void>> forgotPassword(String email) async {
-    final body = {'email': email};
-
-    final response = await _httpService.post<void>(
-      '/auth/forgot-password',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// Şifre sıfırlama (token ile)
-  Future<HttpResponse<void>> resetPassword({
-    required String token,
-    required String newPassword,
-  }) async {
-    final body = {'token': token, 'newPassword': newPassword};
-
-    final response = await _httpService.post<void>(
-      '/auth/reset-password',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// Token geçerliliğini kontrol eder
-  Future<HttpResponse<bool>> validateToken() async {
-    final response = await _httpService.get<bool>(
-      '/auth/validate',
-      fromJson: (json) {
-        if (json is bool) return json;
-        if (json is Map<String, dynamic>) {
-          return json['isValid'] ?? false;
-        }
-        return false;
-      },
-    );
-
-    return response;
-  }
-
-  /// Email doğrulama
-  Future<HttpResponse<void>> verifyEmail(String token) async {
-    final body = {'token': token};
-
-    final response = await _httpService.post<void>(
-      '/auth/verify-email',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// Email doğrulama kodu gönderme
-  Future<HttpResponse<void>> resendVerificationEmail() async {
-    final response = await _httpService.post<void>('/auth/resend-verification');
-    return response;
-  }
-
-  /// 2FA (Two-Factor Authentication) aktifleştirme
-  Future<HttpResponse<Map<String, dynamic>>> enable2FA() async {
-    final response = await _httpService.post<Map<String, dynamic>>(
-      '/auth/enable-2fa',
-      fromJson: (json) => json as Map<String, dynamic>,
-    );
-
-    return response;
-  }
-
-  /// 2FA doğrulama
-  Future<HttpResponse<void>> verify2FA(String code) async {
-    final body = {'code': code};
-
-    final response = await _httpService.post<void>(
-      '/auth/verify-2fa',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// 2FA deaktifleştirme
-  Future<HttpResponse<void>> disable2FA(String password) async {
-    final body = {'password': password};
-
-    final response = await _httpService.post<void>(
-      '/auth/disable-2fa',
-      body: body,
-    );
-
-    return response;
-  }
-
-  /// Aktif oturumları listele
-  Future<HttpResponse<List<Map<String, dynamic>>>> getActiveSessions() async {
-    final response = await _httpService.get<List<Map<String, dynamic>>>(
-      '/auth/sessions',
-      fromJson: (json) {
-        if (json is List) {
-          return json.cast<Map<String, dynamic>>();
-        }
-        return <Map<String, dynamic>>[];
-      },
-    );
-
-    return response;
-  }
-
-  /// Belirli bir oturumu sonlandır
-  Future<HttpResponse<void>> terminateSession(String sessionId) async {
-    final response = await _httpService.delete<void>(
-      '/auth/sessions/$sessionId',
-    );
-    return response;
-  }
-
-  /// Tüm diğer oturumları sonlandır
-  Future<HttpResponse<void>> terminateAllOtherSessions() async {
-    final response = await _httpService.post<void>(
-      '/auth/terminate-all-sessions',
-    );
-    return response;
-  }
-}
+//     try {
+//       final expiresAt = DateTime.parse(expiresAtString);
+//       final nearExpiryTime = expiresAt.subtract(const Duration(minutes: 5));
+//       return DateTime.now().isAfter(nearExpiryTime);
+//     } catch (e) {
+//       return true;
+//     }
+//   }
+// }

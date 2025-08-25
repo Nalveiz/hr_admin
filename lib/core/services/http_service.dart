@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:hr_admin/core/constants/app_constants.dart';
+import 'package:hr_admin/core/services/auth_interceptor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// HTTP Service için temel sınıf
@@ -22,24 +23,7 @@ class HttpService {
         },
       ),
     );
-
-    // Interceptor ekle
-    // _dio.interceptors.add(
-    //   InterceptorsWrapper(
-    //     onRequest: (options, handler) {
-    //       // JWT token varsa ekle
-    //       final token = _prefs.getString('auth_token');
-    //       if (token != null && token.isNotEmpty) {
-    //         options.headers['Authorization'] = 'Bearer $token';
-    //       }
-    //       handler.next(options);
-    //     },
-    //     onError: (error, handler) {
-    //       // Hata loglaması
-    //       handler.next(error);
-    //     },
-    //   ),
-    // );
+    _dio.interceptors.add(AuthInterceptor(dio: _dio, prefs: _prefs));
   }
 
   /// GET isteği
@@ -67,10 +51,8 @@ class HttpService {
   }) async {
     try {
       final response = await _dio.post(endpoint, data: body);
-      print('Created Employee: ${response.data}');
       return _handleResponse<T>(response, fromJson);
     } catch (e) {
-      print('Error creating employee: $e');
       return HttpResponse<T>.error(_handleError(e));
     }
   }
