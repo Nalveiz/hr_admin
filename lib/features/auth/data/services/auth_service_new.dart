@@ -7,7 +7,7 @@ import '../models/auth_tokens_model.dart';
 
 /// Authentication service for handling auth operations
 class AuthService extends BaseHttpService {
-  AuthService(super.prefs);
+  AuthService(super.prefs, super.errorHandlingService);
 
   /// Login with username and password (Updated for NewLdapApi)
   Future<ApiResponse<LoginResponse>> login({

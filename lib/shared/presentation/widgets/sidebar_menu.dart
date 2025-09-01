@@ -28,7 +28,7 @@ class SidebarMenu extends StatelessWidget {
         children: [
           // Logo/Header
           Container(
-            height: 80,
+            height: 61,
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [

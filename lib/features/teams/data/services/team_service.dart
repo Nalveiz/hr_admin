@@ -1,12 +1,15 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/base_http_service.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_response.dart';
+import '../../../../core/services/error_handling_service.dart';
 import '../models/team_model.dart';
 import '../dtos/team_dtos.dart';
 
 /// Team service for handling team operations
 class TeamService extends BaseHttpService {
-  TeamService(super.prefs);
+  TeamService(SharedPreferences prefs, ErrorHandlingService errorHandler)
+    : super(prefs, errorHandler);
 
   /// Get all teams with optional filtering
   Future<ApiResponse<List<TeamModel>>> getTeams([

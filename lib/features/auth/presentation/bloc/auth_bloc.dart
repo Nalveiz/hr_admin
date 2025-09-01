@@ -5,14 +5,17 @@ import 'package:hr_admin/features/auth/data/models/user_model.dart';
 import 'package:hr_admin/features/auth/data/services/auth_service_new.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/error_handling_service.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SharedPreferences _prefs;
   final AuthService _authService;
+  final ErrorHandlingService _errorHandlingService;
 
-  AuthBloc(this._prefs, this._authService) : super(const AuthInitial()) {
+  AuthBloc(this._prefs, this._authService, this._errorHandlingService)
+    : super(const AuthInitial()) {
     on<AuthCheckStatus>(_onCheckStatus);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
@@ -47,7 +50,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       print('Error in _onCheckStatus: $e');
-      emit(AuthError(message: e.toString()));
+      // Check status hataları için basit mesaj
+      emit(
+        const AuthError(
+          message:
+              'Oturum durumu kontrol edilemedi. Lütfen tekrar giriş yapın.',
+        ),
+      );
     }
   }
 
@@ -63,7 +72,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       if (!response.isSuccess || response.data == null) {
-        emit(AuthError(message: response.error ?? 'Login failed'));
+        // response.error zaten ErrorHandlingService'ten gelen kullanıcı dostu mesaj
+        final errorMessage =
+            response.error ?? 'Giriş başarısız oldu. Tekrar deneyin.';
+        emit(AuthError(message: errorMessage));
         return;
       }
       final tokens = response.data!.tokens;
@@ -82,7 +94,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ),
       );
     } catch (e) {
-      emit(AuthError(message: e.toString()));
+      // Network hatalarını kullanıcı dostu mesajlara çevir
+      String userFriendlyMessage = _errorHandlingService
+          .getHumanReadableErrorMessage(e);
+      emit(AuthError(message: userFriendlyMessage));
     }
   }
 
@@ -97,7 +112,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(const AuthUnauthenticated());
     } catch (e) {
-      emit(AuthError(message: e.toString()));
+      // Logout hataları için de kullanıcı dostu mesaj
+      String userFriendlyMessage = _errorHandlingService
+          .getHumanReadableErrorMessage(e);
+      emit(AuthError(message: userFriendlyMessage));
     }
   }
 }

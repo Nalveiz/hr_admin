@@ -5,7 +5,7 @@ import '../models/attendance_record_model.dart';
 
 /// Service for attendance-related API operations
 class AttendanceService extends BaseHttpService {
-  AttendanceService(super.prefs);
+  AttendanceService(super.prefs, super.errorHandlingService);
 
   /// Get attendance records
   Future<ApiResponse<List<AttendanceRecordModel>>> getAttendanceRecords({

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/user_entity.dart';
-import '../cubit/users_cubit_new.dart';
+import '../cubit/users_cubit.dart';
 import '../../../../shared/shared.dart';
 import '../../../../injection_container.dart';
 
-class AddUserDialogNew extends StatefulWidget {
-  const AddUserDialogNew({super.key});
+class EditUserDialogNew extends StatefulWidget {
+  final UserEntity user;
+
+  const EditUserDialogNew({super.key, required this.user});
 
   @override
-  State<AddUserDialogNew> createState() => _AddUserDialogNewState();
+  State<EditUserDialogNew> createState() => _EditUserDialogNewState();
 }
 
-class _AddUserDialogNewState extends State<AddUserDialogNew> {
+class _EditUserDialogNewState extends State<EditUserDialogNew> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
@@ -22,9 +24,28 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
   final _companyIdController = TextEditingController();
   final _managerIdController = TextEditingController();
 
-  UserRoleEntity _selectedRole = UserRoleEntity.personel;
+  late UserRoleEntity _selectedRole;
   DateTime? _employmentStartDate;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFields();
+  }
+
+  void _initializeFields() {
+    _nameController.text = widget.user.name;
+    _surnameController.text = widget.user.surname;
+    _emailController.text = widget.user.email;
+    _phoneController.text = widget.user.phone ?? '';
+    _addressController.text = widget.user.address ?? '';
+    _noteController.text = widget.user.note ?? '';
+    _companyIdController.text = widget.user.companyId;
+    _managerIdController.text = widget.user.managerId ?? '';
+    _selectedRole = widget.user.role;
+    _employmentStartDate = widget.user.employmentStartDate;
+  }
 
   @override
   void dispose() {
@@ -55,7 +76,7 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
   Future<void> _selectDate() async {
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _employmentStartDate ?? DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
@@ -74,7 +95,8 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
     });
 
     try {
-      await sl<UsersCubitNew>().createUser(
+      await sl<UsersCubit>().updateUser(
+        id: widget.user.id,
         name: _nameController.text.trim(),
         surname: _surnameController.text.trim(),
         email: _emailController.text.trim(),
@@ -99,14 +121,14 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
         Navigator.of(context).pop(true);
         sl<SnackBarService>().showSuccess(
           context,
-          'Kullanıcı başarıyla oluşturuldu',
+          'Kullanıcı başarıyla güncellendi',
         );
       }
     } catch (e) {
       if (mounted) {
         sl<SnackBarService>().showError(
           context,
-          'Kullanıcı oluşturulurken hata oluştu: $e',
+          'Kullanıcı güncellenirken hata oluştu: $e',
         );
       }
     } finally {
@@ -135,14 +157,14 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
             Row(
               children: [
                 Icon(
-                  Icons.person_add,
+                  Icons.edit,
                   color: AppThemeColors.of(context).primaryColor,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Yeni Kullanıcı Ekle',
+                    'Kullanıcıyı Düzenle',
                     style: AppThemeTextStyles.of(context).heading3,
                   ),
                 ),
@@ -342,7 +364,7 @@ class _AddUserDialogNewState extends State<AddUserDialogNew> {
                 ),
                 const SizedBox(width: 12),
                 AppButton.primary(
-                  text: Text(_isLoading ? 'Oluşturuluyor...' : 'Oluştur'),
+                  text: Text(_isLoading ? 'Güncelleniyor...' : 'Güncelle'),
                   onPressed: _isLoading ? null : _submit,
                   isLoading: _isLoading,
                 ),

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/entities/user_role.dart';
-import '../../data/models/user_dto.dart';
+import '../../domain/entities/user_entity.dart';
 import '../cubit/users_cubit.dart';
-import '../../../../shared/shared.dart'
-    hide UserRole, CreateUserDto, UpdateUserDto;
+import '../../../../shared/shared.dart';
+import '../../../../injection_container.dart';
 
 class EditUserDialog extends StatefulWidget {
-  final User user;
+  final UserEntity user;
 
   const EditUserDialog({super.key, required this.user});
 
@@ -24,19 +21,19 @@ class _EditUserDialogState extends State<EditUserDialog> {
   late TextEditingController _phoneController;
   late TextEditingController _addressController;
   late TextEditingController _noteController;
-  late UserRole _selectedRole;
+  late UserRoleEntity _selectedRole;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.user.name ?? '');
-    _surnameController = TextEditingController(text: widget.user.surname ?? '');
-    _emailController = TextEditingController(text: widget.user.email ?? '');
+    _nameController = TextEditingController(text: widget.user.name);
+    _surnameController = TextEditingController(text: widget.user.surname);
+    _emailController = TextEditingController(text: widget.user.email);
     _phoneController = TextEditingController(text: widget.user.phone ?? '');
     _addressController = TextEditingController(text: widget.user.address ?? '');
     _noteController = TextEditingController(text: widget.user.note ?? '');
-    _selectedRole = UserRoleExtension.fromInt(widget.user.role ?? 0);
+    _selectedRole = widget.user.role;
   }
 
   @override
@@ -50,15 +47,15 @@ class _EditUserDialogState extends State<EditUserDialog> {
     super.dispose();
   }
 
-  String _getRoleDisplayName(UserRole role) {
+  String _getRoleDisplayName(UserRoleEntity role) {
     switch (role) {
-      case UserRole.personel:
+      case UserRoleEntity.personel:
         return 'Personel';
-      case UserRole.manager:
+      case UserRoleEntity.manager:
         return 'Müdür';
-      case UserRole.hr:
+      case UserRoleEntity.hr:
         return 'İK';
-      case UserRole.superUser:
+      case UserRoleEntity.superUser:
         return 'Süper Kullanıcı';
     }
   }
@@ -69,7 +66,8 @@ class _EditUserDialogState extends State<EditUserDialog> {
     setState(() => _isLoading = true);
 
     try {
-      final dto = UpdateUserDto(
+      await sl<UsersCubit>().updateUser(
+        id: widget.user.id,
         name: _nameController.text.trim(),
         surname: _surnameController.text.trim(),
         email: _emailController.text.trim(),
@@ -83,13 +81,11 @@ class _EditUserDialogState extends State<EditUserDialog> {
         note: _noteController.text.trim().isEmpty
             ? null
             : _noteController.text.trim(),
-        companyId: widget.user.companyId ?? 'default-company',
+        companyId: widget.user.companyId,
         managerId: widget.user.managerId,
-        departmentIds: widget.user.departmentIds ?? [],
-        teamIds: widget.user.teamIds ?? [],
+        departmentIds: widget.user.departmentIds,
+        teamIds: widget.user.teamIds,
       );
-
-      context.read<UsersCubit>().add(UpdateUser(widget.user.id!, dto));
       if (mounted) {
         Navigator.of(context).pop(true);
       }
@@ -180,7 +176,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: DropdownButtonFormField<UserRole>(
+                    child: DropdownButtonFormField<UserRoleEntity>(
                       value: _selectedRole,
                       decoration: InputDecoration(
                         labelText: 'Rol*',
@@ -188,7 +184,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      items: UserRole.values
+                      items: UserRoleEntity.values
                           .map(
                             (role) => DropdownMenuItem(
                               value: role,

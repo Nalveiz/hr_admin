@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/services/department_service.dart';
-import '../../data/models/department_model.dart' as dept_model;
+import '../../../companies/data/models/company_model.dart';
+import '../../../companies/data/services/company_service.dart';
 import '../../../../injection_container.dart';
 import '../../../../shared/shared.dart';
 
@@ -15,51 +16,59 @@ class AddDepartmentDialog extends StatefulWidget {
 class _AddDepartmentDialogState extends State<AddDepartmentDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _budgetController = TextEditingController();
 
   bool _isLoading = false;
-  bool _isActive = true;
+  String? _selectedCompanyId;
+  List<CompanyModel> _companies = [];
   late final DepartmentService _departmentService;
+  late final CompanyService _companyService;
 
   @override
   void initState() {
     super.initState();
-    _departmentService = DepartmentService(sl());
+    _departmentService = DepartmentService(sl(), sl());
+    _companyService = CompanyService(sl(), sl());
+    _loadCompanies();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _descriptionController.dispose();
-    _budgetController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCompanies() async {
+    try {
+      final response = await _companyService.getCompanies();
+      if (response.success && response.data != null && mounted) {
+        setState(() {
+          _companies = response.data!;
+        });
+      }
+    } catch (e) {
+      print('Error loading companies: $e');
+    }
   }
 
   Future<void> _saveDepartment() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedCompanyId == null) {
+      sl<SnackBarService>().showError(context, 'Lütfen bir şirket seçin');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final departmentModel = dept_model.DepartmentModel(
-        id: '', // Will be assigned by server
-        name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        managerId: null,
-        managerName: null,
-        employeeCount: 0, // Baslangic kullanici sayisi
-        budget: _budgetController.text.trim().isEmpty
-            ? null
-            : _budgetController.text.trim(),
-        isActive: _isActive,
-        createdAt: DateTime.now(),
-      );
+      // API spec'ine göre CreateDepartmentDto
+      final createDto = {
+        'name': _nameController.text.trim(),
+        'companyId': _selectedCompanyId!,
+      };
 
-      final response = await _departmentService.createDepartment(
-        departmentModel,
+      final response = await _departmentService.createDepartmentFromDto(
+        createDto,
       );
 
       if (!mounted) return;
@@ -143,41 +152,49 @@ class _AddDepartmentDialogState extends State<AddDepartmentDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Company Selection
+                      Text(
+                        'Şirket *',
+                        style: AppThemeTextStyles.of(context).body1,
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: _selectedCompanyId,
+                        decoration: const InputDecoration(
+                          hintText: 'Şirket seçin',
+                          prefixIcon: Icon(Icons.business),
+                        ),
+                        items: _companies
+                            .map(
+                              (company) => DropdownMenuItem(
+                                value: company.id,
+                                child: Text(company.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: _isLoading
+                            ? null
+                            : (value) {
+                                setState(() {
+                                  _selectedCompanyId = value;
+                                });
+                              },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Şirket seçimi zorunludur';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Department Name
                       AppTextFormField(
                         controller: _nameController,
                         label: 'Departman Adı *',
                         prefixIcon: Icons.apartment,
                         validator: AppValidators.required,
                         enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 16),
-                      AppTextFormField(
-                        controller: _descriptionController,
-                        label: 'Açıklama',
-                        prefixIcon: Icons.description,
-                        maxLines: 3,
-                        enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 16),
-                      AppTextFormField(
-                        controller: _budgetController,
-                        label: 'Bütçe',
-                        prefixIcon: Icons.attach_money,
-                        keyboardType: TextInputType.number,
-                        enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        title: const Text('Aktif'),
-                        subtitle: const Text('Departmanın aktif durumu'),
-                        value: _isActive,
-                        onChanged: _isLoading
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _isActive = value;
-                                });
-                              },
                       ),
                     ],
                   ),

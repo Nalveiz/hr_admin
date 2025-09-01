@@ -6,7 +6,7 @@ import '../dtos/company_dtos.dart';
 
 /// Company service for handling company operations
 class CompanyService extends BaseHttpService {
-  CompanyService(super.prefs);
+  CompanyService(super.prefs, super.errorHandlingService);
 
   /// Get all companies with optional filtering
   Future<ApiResponse<List<CompanyModel>>> getCompanies([

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hr_admin/core/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/department_model.dart';
 import '../../data/services/department_service.dart';
@@ -8,9 +9,11 @@ import 'departments_state.dart';
 class DepartmentsCubit extends Cubit<DepartmentsState> {
   final DepartmentService _departmentService;
 
-  DepartmentsCubit({required SharedPreferences prefs})
-    : _departmentService = DepartmentService(prefs),
-      super(DepartmentsInitial());
+  DepartmentsCubit({
+    required SharedPreferences prefs,
+    required ErrorHandlingService errorHandlingService,
+  }) : _departmentService = DepartmentService(prefs, errorHandlingService),
+       super(DepartmentsInitial());
 
   /// Load all departments
   Future<void> loadDepartments({
@@ -22,12 +25,19 @@ class DepartmentsCubit extends Cubit<DepartmentsState> {
     emit(DepartmentsLoading());
 
     try {
-      final response = await _departmentService.getDepartments(
-        page: page,
-        limit: limit,
-        search: search,
-        isActive: isActive,
-      );
+      ApiResponse<List<DepartmentModel>> response;
+
+      // Eğer arama yapılıyorsa normal endpoint'i kullan, yoksa /all endpoint'ini kullan
+      if (search != null && search.isNotEmpty) {
+        response = await _departmentService.getDepartments(
+          page: page,
+          limit: limit,
+          search: search,
+          isActive: isActive,
+        );
+      } else {
+        response = await _departmentService.getAllDepartments();
+      }
 
       if (response.success && response.data != null) {
         final departments = response.data!

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/user_entity.dart';
-import '../cubit/users_cubit_new.dart';
-import 'user_card_new.dart';
+import '../cubit/users_cubit.dart';
+import 'user_card.dart';
 import '../../../../shared/shared.dart';
 
 class UsersPageContent extends StatelessWidget {
@@ -21,17 +21,17 @@ class UsersPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UsersCubitNew, UsersStateNew>(
+    return BlocBuilder<UsersCubit, UsersState>(
       builder: (context, state) {
-        if (state is UsersLoadingNew) {
+        if (state is UsersLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (state is UsersErrorNew) {
+        if (state is UsersError) {
           return _buildErrorView(context, state.message);
         }
 
-        if (state is UsersLoadedNew) {
+        if (state is UsersLoaded) {
           final users = state.filteredUsers;
 
           if (users.isEmpty) {

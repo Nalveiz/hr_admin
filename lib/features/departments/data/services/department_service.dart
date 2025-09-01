@@ -5,7 +5,7 @@ import '../models/department_model.dart';
 
 /// Service for department-related API operations
 class DepartmentService extends BaseHttpService {
-  DepartmentService(super.prefs);
+  DepartmentService(super.prefs, super.errorHandlingService);
 
   /// Get all departments
   Future<ApiResponse<List<DepartmentModel>>> getDepartments({
@@ -61,6 +61,46 @@ class DepartmentService extends BaseHttpService {
     }
   }
 
+  /// Get department details (includes teams)
+  Future<ApiResponse<Map<String, dynamic>>> getDepartmentDetails(
+    String id,
+  ) async {
+    try {
+      final response = await dio.get(ApiEndpoints.departmentDetails(id));
+
+      return ApiResponse.success(
+        response.data as Map<String, dynamic>,
+        message: 'Department details fetched successfully',
+      );
+    } catch (e) {
+      print('Department details service error: $e');
+      return ApiResponse.error(
+        'Failed to fetch department details: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Create new department using CreateDepartmentDto format
+  Future<ApiResponse<DepartmentModel>> createDepartmentFromDto(
+    Map<String, dynamic> createDto,
+  ) async {
+    try {
+      final response = await dio.post(
+        ApiEndpoints.departments,
+        data: createDto,
+      );
+
+      final createdDepartment = DepartmentModel.fromJson(response.data);
+
+      return ApiResponse.success(
+        createdDepartment,
+        message: 'Department created successfully',
+      );
+    } catch (e) {
+      return ApiResponse.error('Failed to create department: ${e.toString()}');
+    }
+  }
+
   /// Create new department
   Future<ApiResponse<DepartmentModel>> createDepartment(
     DepartmentModel department,
@@ -88,16 +128,49 @@ class DepartmentService extends BaseHttpService {
     }
   }
 
+  /// Update department using UpdateDepartmentDto format
+  Future<ApiResponse<DepartmentModel>> updateDepartmentFromDto(
+    String id,
+    Map<String, dynamic> updateDto,
+  ) async {
+    try {
+      final response = await dio.put(
+        '${ApiEndpoints.departments}/$id',
+        data: updateDto,
+      );
+
+      final updatedDepartment = DepartmentModel.fromJson(response.data);
+
+      return ApiResponse.success(
+        updatedDepartment,
+        message: 'Department updated successfully',
+      );
+    } catch (e) {
+      return ApiResponse.error('Failed to update department: ${e.toString()}');
+    }
+  }
+
   /// Update department
   Future<ApiResponse<DepartmentModel>> updateDepartment(
     String id,
     DepartmentModel department,
   ) async {
     try {
-      final requestData = department.toJson();
-      // Remove read-only fields
-      requestData.remove('createdAt');
-      requestData.remove('employeeCount');
+      // API'nin UpdateDepartmentDto'suna göre sadece bu alanları gönder
+      final requestData = <String, dynamic>{
+        'name': department.name,
+        'companyId': department.companyId,
+        'valid': department.isActive, // isActive -> valid mapping
+      };
+
+      // Null companyId kontrolü (API GUID bekliyor)
+      if (department.companyId == null || department.companyId!.isEmpty) {
+        return ApiResponse.error(
+          'Company ID is required for department update',
+        );
+      }
+
+      print('Update request data: $requestData'); // Debug için
 
       final response = await dio.put(
         '${ApiEndpoints.departments}/$id',
@@ -111,7 +184,8 @@ class DepartmentService extends BaseHttpService {
         message: response.data['message'] ?? 'Department updated successfully',
       );
     } catch (e) {
-      return ApiResponse.error('Failed to update department');
+      print('Update department error: $e'); // Debug için
+      return ApiResponse.error('Failed to update department: ${e.toString()}');
     }
   }
 
@@ -194,6 +268,32 @@ class DepartmentService extends BaseHttpService {
       );
     } catch (e) {
       return ApiResponse.error('Failed to assign manager');
+    }
+  }
+
+  /// Get all departments (active and inactive)
+  Future<ApiResponse<List<DepartmentModel>>> getAllDepartments() async {
+    try {
+      final response = await dio.get(ApiEndpoints.departmentsAll);
+
+      // API direkt array döndürüyor mu kontrol et
+      final List<dynamic> data = response.data is List
+          ? response.data
+          : (response.data['data'] ?? []);
+
+      final departments = data
+          .map((json) => DepartmentModel.fromJson(json))
+          .toList();
+
+      return ApiResponse.success(
+        departments,
+        message: 'All departments fetched successfully',
+      );
+    } catch (e) {
+      print('Department service error: $e');
+      return ApiResponse.error(
+        'Failed to fetch all departments: ${e.toString()}',
+      );
     }
   }
 

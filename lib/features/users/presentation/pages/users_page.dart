@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/user_entity.dart';
-import '../cubit/users_cubit_new.dart';
-import '../widgets/add_user_dialog_new.dart';
-import '../widgets/edit_user_dialog_new.dart';
+import '../cubit/users_cubit.dart';
+import '../dialogs/add_user_dialog.dart';
+import '../widgets/edit_user_dialog.dart';
 import '../widgets/users_page_header.dart';
 import '../widgets/users_page_content.dart';
 import '../../../../injection_container.dart';
 import '../../../../shared/shared.dart';
 
-class UsersPageNew extends StatefulWidget {
-  const UsersPageNew({super.key});
+class UsersPage extends StatefulWidget {
+  const UsersPage({super.key});
 
   @override
-  State<UsersPageNew> createState() => _UsersPageNewState();
+  State<UsersPage> createState() => _UsersPageState();
 }
 
-class _UsersPageNewState extends State<UsersPageNew> {
-  late final UsersCubitNew _usersCubit;
+class _UsersPageState extends State<UsersPage> {
+  late final UsersCubit _usersCubit;
   final TextEditingController _searchController = TextEditingController();
   UserRoleEntity? _selectedRoleFilter;
 
   @override
   void initState() {
     super.initState();
-    _usersCubit = sl<UsersCubitNew>();
+    _usersCubit = sl<UsersCubit>();
     _usersCubit.fetchUsers();
   }
 
@@ -86,7 +86,7 @@ class _UsersPageNewState extends State<UsersPageNew> {
   Future<void> _showAddUserDialog() async {
     final result = await sl<DialogService>().showCustom(
       context,
-      child: const AddUserDialogNew(),
+      child: const AddUserDialog(),
     );
     if (result == true) {
       _refreshUsers();

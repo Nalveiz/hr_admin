@@ -18,6 +18,20 @@ class ErrorInterceptor extends Interceptor {
       name: 'ErrorInterceptor',
     );
     developer.log(
+      'Request URL: ${err.requestOptions.uri}',
+      name: 'ErrorInterceptor',
+    );
+    developer.log(
+      'Request Method: ${err.requestOptions.method}',
+      name: 'ErrorInterceptor',
+    );
+    if (err.response?.data != null) {
+      developer.log(
+        'Response Data: ${err.response?.data}',
+        name: 'ErrorInterceptor',
+      );
+    }
+    developer.log(
       'Original Error: ${apiException.originalError}',
       name: 'ErrorInterceptor',
     );

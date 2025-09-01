@@ -4,7 +4,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../../features/users/presentation/pages/users_page_new.dart';
+import '../../features/users/presentation/pages/users_page.dart';
 import '../../features/departments/presentation/pages/departments_page.dart';
 import '../../features/departments/presentation/pages/department_detail_page.dart';
 
@@ -51,17 +51,17 @@ class AppRouter {
           GoRoute(
             path: '/users',
             name: 'users',
-            builder: (context, state) => const UsersPageNew(),
+            builder: (context, state) => const UsersPage(),
             routes: [
               GoRoute(
                 path: '/add',
                 name: 'add-user',
-                builder: (context, state) => const UsersPageNew(),
+                builder: (context, state) => const UsersPage(),
               ),
               GoRoute(
                 path: '/:id',
                 name: 'user-detail',
-                builder: (context, state) => const UsersPageNew(),
+                builder: (context, state) => const UsersPage(),
               ),
             ],
           ),

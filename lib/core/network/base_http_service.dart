@@ -5,13 +5,15 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../network/api_endpoints.dart';
 import '../network/api_response.dart';
+import '../services/error_handling_service.dart';
 
 /// Base HTTP service class providing common functionality
 abstract class BaseHttpService {
   late final Dio _dio;
   final SharedPreferences _prefs;
+  final ErrorHandlingService _errorHandlingService;
 
-  BaseHttpService(this._prefs) {
+  BaseHttpService(this._prefs, this._errorHandlingService) {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
@@ -203,16 +205,15 @@ abstract class BaseHttpService {
 
   /// Handle error response
   ApiResponse<T> _handleError<T>(DioException error) {
-    String message = 'An error occurred';
+    // ErrorHandlingService kullanarak kullanıcı dostu mesaj oluştur
+    String userFriendlyMessage = _errorHandlingService.getNetworkErrorMessage(
+      error,
+    );
 
-    if (error.response?.data is Map<String, dynamic>) {
-      final data = error.response!.data as Map<String, dynamic>;
-      message = data['message'] ?? data['error'] ?? message;
-    } else if (error.message != null) {
-      message = error.message!;
-    }
-
-    return ApiResponse.error(message, statusCode: error.response?.statusCode);
+    return ApiResponse.error(
+      userFriendlyMessage,
+      statusCode: error.response?.statusCode,
+    );
   }
 
   /// Get Dio instance (for advanced usage)

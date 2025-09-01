@@ -10,11 +10,13 @@ class UserEntity extends Equatable {
   final DateTime? employmentStartDate;
   final String? phone;
   final String? address;
+  final String? signature;
+  final String? attachment;
   final String? note;
   final String? managerId;
   final String companyId;
-  final List<String>? departmentIds;
-  final List<String>? teamIds;
+  final List<String> departmentIds;
+  final List<String> teamIds;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -28,10 +30,12 @@ class UserEntity extends Equatable {
     this.employmentStartDate,
     this.phone,
     this.address,
+    this.signature,
+    this.attachment,
     this.note,
     this.managerId,
-    this.departmentIds,
-    this.teamIds,
+    this.departmentIds = const [],
+    this.teamIds = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -49,6 +53,8 @@ class UserEntity extends Equatable {
     employmentStartDate,
     phone,
     address,
+    signature,
+    attachment,
     note,
     managerId,
     departmentIds,

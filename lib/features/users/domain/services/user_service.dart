@@ -29,8 +29,8 @@ abstract class UserService {
     String? address,
     String? note,
     String? managerId,
-    List<String>? departmentIds,
-    List<String>? teamIds,
+    List<String> departmentIds = const [],
+    List<String> teamIds = const [],
   });
 
   /// Update user with validation
@@ -114,8 +114,8 @@ class UserServiceImpl implements UserService {
     String? address,
     String? note,
     String? managerId,
-    List<String>? departmentIds,
-    List<String>? teamIds,
+    List<String> departmentIds = const [],
+    List<String> teamIds = const [],
   }) async {
     // Validation
     if (name.trim().isEmpty) {
@@ -215,8 +215,8 @@ class UserServiceImpl implements UserService {
       address: address?.trim(),
       note: note?.trim(),
       managerId: managerId?.trim(),
-      departmentIds: departmentIds,
-      teamIds: teamIds,
+      departmentIds: departmentIds ?? [],
+      teamIds: teamIds ?? [],
     );
   }
 

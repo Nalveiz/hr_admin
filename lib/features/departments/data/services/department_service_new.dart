@@ -5,7 +5,7 @@ import '../models/department_model_new.dart';
 
 /// Department service for handling department operations
 class DepartmentServiceNew extends BaseHttpService {
-  DepartmentServiceNew(super.prefs);
+  DepartmentServiceNew(super.prefs, super.errorHandlingService);
 
   /// Get all departments with optional filtering
   Future<ApiResponse<List<DepartmentModel>>> getDepartments([

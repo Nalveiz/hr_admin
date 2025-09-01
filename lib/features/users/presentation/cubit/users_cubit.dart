@@ -1,8 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../data/services/user_service.dart';
-import '../../data/models/user_dto.dart';
-import '../../domain/entities/user.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/services/user_service.dart';
 
 // States
 abstract class UsersState extends Equatable {
@@ -17,20 +16,23 @@ class UsersInitial extends UsersState {}
 class UsersLoading extends UsersState {}
 
 class UsersLoaded extends UsersState {
-  final List<User> users;
-  final bool hasReachedMax;
+  final List<UserEntity> users;
+  final List<UserEntity> filteredUsers;
 
-  const UsersLoaded({this.users = const [], this.hasReachedMax = false});
+  const UsersLoaded({required this.users, required this.filteredUsers});
 
-  UsersLoaded copyWith({List<User>? users, bool? hasReachedMax}) {
+  UsersLoaded copyWith({
+    List<UserEntity>? users,
+    List<UserEntity>? filteredUsers,
+  }) {
     return UsersLoaded(
       users: users ?? this.users,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      filteredUsers: filteredUsers ?? this.filteredUsers,
     );
   }
 
   @override
-  List<Object?> get props => [users, hasReachedMax];
+  List<Object?> get props => [users, filteredUsers];
 }
 
 class UsersError extends UsersState {
@@ -43,7 +45,7 @@ class UsersError extends UsersState {
 }
 
 class UserCreated extends UsersState {
-  final User user;
+  final UserEntity user;
 
   const UserCreated(this.user);
 
@@ -52,7 +54,7 @@ class UserCreated extends UsersState {
 }
 
 class UserUpdated extends UsersState {
-  final User user;
+  final UserEntity user;
 
   const UserUpdated(this.user);
 
@@ -69,252 +71,310 @@ class UserDeleted extends UsersState {
   List<Object?> get props => [userId];
 }
 
-// Events
-abstract class UsersEvent extends Equatable {
-  const UsersEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class LoadUsers extends UsersEvent {
-  final UserFilterParams? filters;
-
-  const LoadUsers({this.filters});
-
-  @override
-  List<Object?> get props => [filters];
-}
-
-class RefreshUsers extends UsersEvent {
-  final UserFilterParams? filters;
-
-  const RefreshUsers({this.filters});
-
-  @override
-  List<Object?> get props => [filters];
-}
-
-class LoadUserById extends UsersEvent {
-  final String id;
-
-  const LoadUserById(this.id);
-
-  @override
-  List<Object?> get props => [id];
-}
-
-class LoadUsersByRole extends UsersEvent {
-  final int role;
-
-  const LoadUsersByRole(this.role);
-
-  @override
-  List<Object?> get props => [role];
-}
-
-class LoadUsersByCompany extends UsersEvent {
-  final String companyId;
-
-  const LoadUsersByCompany(this.companyId);
-
-  @override
-  List<Object?> get props => [companyId];
-}
-
-class LoadManagers extends UsersEvent {}
-
-class LoadHrUsers extends UsersEvent {}
-
-class SearchUsers extends UsersEvent {
-  final String searchTerm;
-
-  const SearchUsers(this.searchTerm);
-
-  @override
-  List<Object?> get props => [searchTerm];
-}
-
-class CreateUser extends UsersEvent {
-  final CreateUserDto dto;
-
-  const CreateUser(this.dto);
-
-  @override
-  List<Object?> get props => [dto];
-}
-
-class UpdateUser extends UsersEvent {
-  final String id;
-  final UpdateUserDto dto;
-
-  const UpdateUser(this.id, this.dto);
-
-  @override
-  List<Object?> get props => [id, dto];
-}
-
-class DeleteUser extends UsersEvent {
-  final String id;
-
-  const DeleteUser(this.id);
-
-  @override
-  List<Object?> get props => [id];
-}
-
 // Cubit
-class UsersCubit extends Bloc<UsersEvent, UsersState> {
+class UsersCubit extends Cubit<UsersState> {
   final UserService _userService;
+  List<UserEntity> _allUsers = [];
 
-  UsersCubit(this._userService) : super(UsersInitial()) {
-    on<LoadUsers>(_onLoadUsers);
-    on<RefreshUsers>(_onRefreshUsers);
-    on<LoadUserById>(_onLoadUserById);
-    on<LoadUsersByRole>(_onLoadUsersByRole);
-    on<LoadUsersByCompany>(_onLoadUsersByCompany);
-    on<LoadManagers>(_onLoadManagers);
-    on<LoadHrUsers>(_onLoadHrUsers);
-    on<SearchUsers>(_onSearchUsers);
-    on<CreateUser>(_onCreateUser);
-    on<UpdateUser>(_onUpdateUser);
-    on<DeleteUser>(_onDeleteUser);
-  }
+  UsersCubit(this._userService) : super(UsersInitial());
 
-  Future<void> _onLoadUsers(LoadUsers event, Emitter<UsersState> emit) async {
+  /// Fetch all users
+  Future<void> fetchUsers({
+    String? searchTerm,
+    UserRoleEntity? role,
+    String? companyId,
+    int? pageNumber,
+    int? pageSize,
+  }) async {
+    print(
+      '🔍 UsersCubit: fetchUsers called with searchTerm: $searchTerm, role: $role, companyId: $companyId',
+    );
     try {
+      print('🔍 UsersCubit: Emitting UsersLoading state');
       emit(UsersLoading());
-      final users = await _userService.getUsers(filters: event.filters);
-      emit(UsersLoaded(users: users));
-    } catch (e) {
-      emit(UsersError(e.toString()));
-    }
-  }
 
-  Future<void> _onRefreshUsers(
-    RefreshUsers event,
-    Emitter<UsersState> emit,
-  ) async {
-    try {
-      final users = await _userService.getUsers(filters: event.filters);
-      emit(UsersLoaded(users: users));
-    } catch (e) {
-      emit(UsersError(e.toString()));
-    }
-  }
+      print('🔍 UsersCubit: Calling _userService.getUsers');
+      final result = await _userService.getUsers(
+        searchTerm: searchTerm,
+        role: role,
+        companyId: companyId,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      );
 
-  Future<void> _onLoadUserById(
-    LoadUserById event,
-    Emitter<UsersState> emit,
-  ) async {
-    try {
-      emit(UsersLoading());
-      final user = await _userService.getUserById(event.id);
-      if (user != null) {
-        emit(UsersLoaded(users: [user]));
+      print(
+        '🔍 UsersCubit: Service result - isSuccess: ${result.isSuccess}, data length: ${result.isSuccess ? result.data?.length : 'N/A'}, errorMessage: ${result.exception?.message}',
+      );
+
+      if (result.isSuccess && result.data != null) {
+        _allUsers = result.data!;
+        print(
+          '🔍 UsersCubit: Emitting UsersLoaded with ${_allUsers.length} users',
+        );
+        emit(UsersLoaded(users: _allUsers, filteredUsers: _allUsers));
       } else {
-        emit(const UsersError('Kullanıcı bulunamadı'));
+        print(
+          '🔍 UsersCubit: Emitting UsersError - ${result.exception?.message}',
+        );
+        emit(
+          UsersError(
+            result.exception?.message ?? 'Kullanıcılar yüklenirken hata oluştu',
+          ),
+        );
       }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      print('🔍 UsersCubit: Exception caught: $e');
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onLoadUsersByRole(
-    LoadUsersByRole event,
-    Emitter<UsersState> emit,
-  ) async {
+  /// Get user by ID
+  Future<void> getUserById(String id) async {
     try {
       emit(UsersLoading());
-      final users = await _userService.getUsersByRole(event.role);
-      emit(UsersLoaded(users: users));
+
+      final result = await _userService.getUserById(id);
+
+      if (result.isSuccess && result.data != null) {
+        emit(UsersLoaded(users: [result.data!], filteredUsers: [result.data!]));
+      } else {
+        emit(UsersError(result.exception?.message ?? 'Kullanıcı bulunamadı'));
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onLoadUsersByCompany(
-    LoadUsersByCompany event,
-    Emitter<UsersState> emit,
-  ) async {
+  /// Get users by role
+  Future<void> getUsersByRole(UserRoleEntity role) async {
     try {
       emit(UsersLoading());
-      final users = await _userService.getUsersByCompany(event.companyId);
-      emit(UsersLoaded(users: users));
+
+      final result = await _userService.getUsersByRole(role);
+
+      if (result.isSuccess && result.data != null) {
+        _allUsers = result.data!;
+        emit(UsersLoaded(users: _allUsers, filteredUsers: _allUsers));
+      } else {
+        emit(
+          UsersError(
+            result.exception?.message ??
+                'Rol bazlı kullanıcılar yüklenirken hata oluştu',
+          ),
+        );
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onLoadManagers(
-    LoadManagers event,
-    Emitter<UsersState> emit,
-  ) async {
+  /// Get managers
+  Future<void> getManagers() async {
     try {
       emit(UsersLoading());
-      final users = await _userService.getManagers();
-      emit(UsersLoaded(users: users));
+
+      final result = await _userService.getManagers();
+
+      if (result.isSuccess && result.data != null) {
+        _allUsers = result.data!;
+        emit(UsersLoaded(users: _allUsers, filteredUsers: _allUsers));
+      } else {
+        emit(
+          UsersError(
+            result.exception?.message ?? 'Yöneticiler yüklenirken hata oluştu',
+          ),
+        );
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onLoadHrUsers(
-    LoadHrUsers event,
-    Emitter<UsersState> emit,
-  ) async {
+  /// Get HR users
+  Future<void> getHRUsers() async {
     try {
       emit(UsersLoading());
-      final users = await _userService.getHrUsers();
-      emit(UsersLoaded(users: users));
+
+      final result = await _userService.getHRUsers();
+
+      if (result.isSuccess && result.data != null) {
+        _allUsers = result.data!;
+        emit(UsersLoaded(users: _allUsers, filteredUsers: _allUsers));
+      } else {
+        emit(
+          UsersError(
+            result.exception?.message ??
+                'İK kullanıcıları yüklenirken hata oluştu',
+          ),
+        );
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onSearchUsers(
-    SearchUsers event,
-    Emitter<UsersState> emit,
-  ) async {
+  /// Search users
+  void searchUsers({
+    String? searchTerm,
+    UserRoleEntity? role,
+    String? companyId,
+  }) {
+    final currentState = state;
+    if (currentState is UsersLoaded) {
+      List<UserEntity> filtered = List.from(currentState.users);
+
+      // Apply search term filter
+      if (searchTerm != null && searchTerm.isNotEmpty) {
+        final searchLower = searchTerm.toLowerCase();
+        filtered = filtered.where((user) {
+          return user.name.toLowerCase().contains(searchLower) ||
+              user.surname.toLowerCase().contains(searchLower) ||
+              user.email.toLowerCase().contains(searchLower) ||
+              user.fullName.toLowerCase().contains(searchLower);
+        }).toList();
+      }
+
+      // Apply role filter
+      if (role != null) {
+        filtered = filtered.where((user) => user.role == role).toList();
+      }
+
+      // Apply company filter
+      if (companyId != null && companyId.isNotEmpty) {
+        filtered = filtered
+            .where((user) => user.companyId == companyId)
+            .toList();
+      }
+
+      emit(currentState.copyWith(filteredUsers: filtered));
+    }
+  }
+
+  /// Create user
+  Future<void> createUser({
+    required String name,
+    required String surname,
+    required String email,
+    required UserRoleEntity role,
+    required String companyId,
+    DateTime? employmentStartDate,
+    String? phone,
+    String? address,
+    String? note,
+    String? managerId,
+    List<String> departmentIds = const [],
+    List<String> teamIds = const [],
+  }) async {
     try {
       emit(UsersLoading());
-      final users = await _userService.searchUsers(event.searchTerm);
-      emit(UsersLoaded(users: users));
+
+      final result = await _userService.createUser(
+        name: name,
+        surname: surname,
+        email: email,
+        role: role,
+        companyId: companyId,
+        employmentStartDate: employmentStartDate,
+        phone: phone,
+        address: address,
+        note: note,
+        managerId: managerId,
+        departmentIds: departmentIds,
+        teamIds: teamIds,
+      );
+
+      if (result.isSuccess && result.data != null) {
+        emit(UserCreated(result.data!));
+        // Refresh the list
+        await fetchUsers();
+      } else {
+        emit(
+          UsersError(result.exception?.message ?? 'Kullanıcı oluşturulamadı'),
+        );
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onCreateUser(CreateUser event, Emitter<UsersState> emit) async {
+  /// Update user
+  Future<void> updateUser({
+    required String id,
+    required String name,
+    required String surname,
+    required String email,
+    required UserRoleEntity role,
+    required String companyId,
+    DateTime? employmentStartDate,
+    String? phone,
+    String? address,
+    String? note,
+    String? managerId,
+    List<String>? departmentIds,
+    List<String>? teamIds,
+  }) async {
     try {
-      final user = await _userService.createUser(event.dto);
-      emit(UserCreated(user));
-      // Reload users after creation
-      add(const LoadUsers());
+      emit(UsersLoading());
+
+      final result = await _userService.updateUser(
+        id: id,
+        name: name,
+        surname: surname,
+        email: email,
+        role: role,
+        companyId: companyId,
+        employmentStartDate: employmentStartDate,
+        phone: phone,
+        address: address,
+        note: note,
+        managerId: managerId,
+        departmentIds: departmentIds,
+        teamIds: teamIds,
+      );
+
+      if (result.isSuccess && result.data != null) {
+        emit(UserUpdated(result.data!));
+        // Refresh the list
+        await fetchUsers();
+      } else {
+        emit(
+          UsersError(result.exception?.message ?? 'Kullanıcı güncellenemedi'),
+        );
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onUpdateUser(UpdateUser event, Emitter<UsersState> emit) async {
+  /// Delete user
+  Future<void> deleteUser(String id) async {
     try {
-      final user = await _userService.updateUser(event.id, event.dto);
-      emit(UserUpdated(user));
-      // Reload users after update
-      add(const LoadUsers());
+      emit(UsersLoading());
+
+      final result = await _userService.deleteUser(id);
+
+      if (result.isSuccess) {
+        emit(UserDeleted(id));
+        // Refresh the list
+        await fetchUsers();
+      } else {
+        emit(UsersError(result.exception?.message ?? 'Kullanıcı silinemedi'));
+      }
     } catch (e) {
-      emit(UsersError(e.toString()));
+      emit(UsersError('Beklenmeyen bir hata oluştu: $e'));
     }
   }
 
-  Future<void> _onDeleteUser(DeleteUser event, Emitter<UsersState> emit) async {
-    try {
-      await _userService.deleteUser(event.id);
-      emit(UserDeleted(event.id));
-      // Reload users after deletion
-      add(const LoadUsers());
-    } catch (e) {
-      emit(UsersError(e.toString()));
+  /// Clear search and show all users
+  void clearSearch() {
+    final currentState = state;
+    if (currentState is UsersLoaded) {
+      emit(currentState.copyWith(filteredUsers: currentState.users));
     }
+  }
+
+  /// Refresh data
+  Future<void> refresh() async {
+    await fetchUsers();
   }
 }

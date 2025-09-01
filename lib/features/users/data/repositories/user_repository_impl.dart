@@ -2,12 +2,12 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../services/user_service_new.dart';
-import '../models/user_model_new.dart';
+import '../services/user_service.dart' as data_service;
+import '../models/user_model.dart';
 
 /// User repository implementation
 class UserRepositoryImpl implements UserRepository {
-  final UserServiceNew _userService;
+  final data_service.UserApiService _userService;
 
   UserRepositoryImpl(this._userService);
 
@@ -129,8 +129,8 @@ class UserRepositoryImpl implements UserRepository {
     String? address,
     String? note,
     String? managerId,
-    List<String>? departmentIds,
-    List<String>? teamIds,
+    List<String> departmentIds = const [],
+    List<String> teamIds = const [],
   }) async {
     try {
       final createDto = CreateUserDto(
@@ -192,8 +192,8 @@ class UserRepositoryImpl implements UserRepository {
         address: address,
         note: note,
         managerId: managerId,
-        departmentIds: departmentIds,
-        teamIds: teamIds,
+        departmentIds: departmentIds ?? [],
+        teamIds: teamIds ?? [],
       );
 
       final response = await _userService.updateUser(id, updateDto);

@@ -43,7 +43,6 @@ extension ContextExtension on BuildContext {
   /// Colors
   Color get primaryColor => colorScheme.primary;
   Color get secondaryColor => colorScheme.secondary;
-  Color get backgroundColor => colorScheme.background;
   Color get surfaceColor => colorScheme.surface;
   Color get errorColor => colorScheme.error;
 

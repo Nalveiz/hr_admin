@@ -1,176 +1,266 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_theme_new.dart' as NewTheme;
-import '../../domain/entities/user.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../../../shared/shared.dart';
 
 class UserCard extends StatelessWidget {
-  final User user;
-  final VoidCallback onTap;
-  final VoidCallback? onEdit;
+  final UserEntity user;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const UserCard({
     super.key,
     required this.user,
-    required this.onTap,
-    this.onEdit,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final themeColors = NewTheme.AppThemeColors.of(context);
-    final themeTextStyles = NewTheme.AppThemeTextStyles.of(context);
+    final responsive = ResponsiveUtils(context);
 
+    return responsive.isMobile
+        ? _buildMobileCard(context)
+        : _buildDesktopCard(context);
+  }
+
+  Widget _buildMobileCard(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 2,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: AppThemeColors.of(
+            context,
+          ).primaryColor.withValues(alpha: 0.1),
+          child: Text(
+            _getRoleIcon(user.role),
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+        title: Text(
+          user.fullName,
+          style: AppThemeTextStyles.of(context).subtitle1,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(user.email),
+            Text(
+              _getRoleDisplayName(user.role),
+              style: TextStyle(
+                color: AppThemeColors.of(context).primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            switch (value) {
+              case 'edit':
+                onEdit();
+                break;
+              case 'delete':
+                onDelete();
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'edit',
+              child: ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('Düzenle'),
+                dense: true,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'delete',
+              child: ListTile(
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Sil'),
+                dense: true,
+              ),
+            ),
+          ],
+        ),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  Widget _buildDesktopCard(BuildContext context) {
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Profile Picture/Initials
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: themeColors.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: themeColors.primaryColor.withValues(alpha: 0.2),
-                    width: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with actions
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppThemeColors.of(
+                    context,
+                  ).primaryColor.withValues(alpha: 0.1),
+                  child: Text(
+                    _getRoleIcon(user.role),
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ),
-                child: _buildInitials(context),
-              ),
-              const SizedBox(height: 12),
-
-              // Name
-              Text(
-                user.fullName,
-                style: themeTextStyles.subtitle1.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-
-              // User ID
-              if (user.id != null)
-                Text(
-                  user.id!,
-                  style: themeTextStyles.caption.copyWith(
-                    color: themeColors.primaryColor,
-                  ),
-                ),
-              const SizedBox(height: 8),
-
-              // Email
-              if (user.email != null)
-                Text(
-                  user.email!,
-                  style: themeTextStyles.body2,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              const SizedBox(height: 4),
-
-              // Role
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: themeColors.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  user.roleText,
-                  style: themeTextStyles.caption.copyWith(
-                    color: themeColors.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const Spacer(),
-
-              // Status & Actions
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Status
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: user.isActive
-                              ? themeColors.successColor
-                              : themeColors.errorColor,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
                       Text(
-                        user.isActive ? 'Aktif' : 'Pasif',
-                        style: themeTextStyles.caption.copyWith(
-                          color: user.isActive
-                              ? themeColors.successColor
-                              : themeColors.errorColor,
-                          fontWeight: FontWeight.w600,
+                        user.fullName,
+                        style: AppThemeTextStyles.of(context).subtitle1,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        _getRoleDisplayName(user.role),
+                        style: TextStyle(
+                          color: AppThemeColors.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-
-                  // Edit button
-                  if (onEdit != null)
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        color: themeColors.primaryColor,
-                        size: 20,
-                      ),
-                      onPressed: onEdit,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        onEdit();
+                        break;
+                      case 'delete':
+                        onDelete();
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: ListTile(
+                        leading: Icon(Icons.edit),
+                        title: Text('Düzenle'),
+                        dense: true,
                       ),
                     ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: ListTile(
+                        leading: Icon(Icons.delete, color: Colors.red),
+                        title: Text('Sil'),
+                        dense: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+
+            // User Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow(context, Icons.email, user.email),
+                  if (user.phone != null) ...[
+                    const SizedBox(height: 4),
+                    _buildInfoRow(context, Icons.phone, user.phone!),
+                  ],
+                  if (user.employmentStartDate != null) ...[
+                    const SizedBox(height: 4),
+                    _buildInfoRow(
+                      context,
+                      Icons.work,
+                      'İşe Başlama: ${_formatDate(user.employmentStartDate!)}',
+                    ),
+                  ],
                 ],
               ),
-            ],
-          ),
+            ),
+
+            // Quick Actions
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton.secondary(
+                    text: const Text('Düzenle'),
+                    icon: Icons.edit,
+                    onPressed: onEdit,
+                    size: ButtonSize.small,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AppButton.danger(
+                  text: const Text('Sil'),
+                  icon: Icons.delete,
+                  onPressed: onDelete,
+                  size: ButtonSize.small,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInitials(BuildContext context) {
-    final themeColors = NewTheme.AppThemeColors.of(context);
-    final themeTextStyles = NewTheme.AppThemeTextStyles.of(context);
-
-    final firstName = user.name ?? '';
-    final lastName = user.surname ?? '';
-    final initials =
-        '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
-            .toUpperCase();
-
-    return Center(
-      child: Text(
-        initials.isNotEmpty ? initials : 'U',
-        style: themeTextStyles.heading3.copyWith(
-          color: themeColors.primaryColor,
-          fontWeight: FontWeight.bold,
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: AppThemeColors.of(context).textSecondary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: AppThemeTextStyles.of(context).caption,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
+      ],
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _getRoleDisplayName(UserRoleEntity role) {
+    switch (role) {
+      case UserRoleEntity.personel:
+        return 'Personel';
+      case UserRoleEntity.manager:
+        return 'Müdür';
+      case UserRoleEntity.hr:
+        return 'İK';
+      case UserRoleEntity.superUser:
+        return 'Süper Kullanıcı';
+    }
+  }
+
+  String _getRoleIcon(UserRoleEntity role) {
+    switch (role) {
+      case UserRoleEntity.personel:
+        return '👤';
+      case UserRoleEntity.manager:
+        return '👔';
+      case UserRoleEntity.hr:
+        return '👥';
+      case UserRoleEntity.superUser:
+        return '⭐';
+    }
   }
 }

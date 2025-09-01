@@ -13,10 +13,23 @@ enum UserRole {
   static UserRole fromValue(int value) {
     return UserRole.values.firstWhere((role) => role.value == value);
   }
+
+  String toJson() {
+    switch (this) {
+      case UserRole.Personel:
+        return 'Personel';
+      case UserRole.Manager:
+        return 'Manager';
+      case UserRole.HR:
+        return 'Hr';
+      case UserRole.SuperUser:
+        return 'SuperUser';
+    }
+  }
 }
 
 /// User model for NewLdapApi
-class UserModelNew {
+class UserModel {
   final String id;
   final String name;
   final String surname;
@@ -25,15 +38,17 @@ class UserModelNew {
   final DateTime? employmentStartDate;
   final String? phone;
   final String? address;
+  final String? signature;
+  final String? attachment;
   final String? note;
   final String? managerId;
   final String companyId;
-  final List<String>? departmentIds;
-  final List<String>? teamIds;
+  final List<String> departmentIds;
+  final List<String> teamIds;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  const UserModelNew({
+  const UserModel({
     required this.id,
     required this.name,
     required this.surname,
@@ -43,18 +58,20 @@ class UserModelNew {
     this.employmentStartDate,
     this.phone,
     this.address,
+    this.signature,
+    this.attachment,
     this.note,
     this.managerId,
-    this.departmentIds,
-    this.teamIds,
+    this.departmentIds = const [],
+    this.teamIds = const [],
     this.createdAt,
     this.updatedAt,
   });
 
   String get fullName => '$name $surname';
 
-  factory UserModelNew.fromJson(Map<String, dynamic> json) {
-    return UserModelNew(
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
       id: json['id'],
       name: json['name'],
       surname: json['surname'],
@@ -66,14 +83,16 @@ class UserModelNew {
           : null,
       phone: json['phone'],
       address: json['address'],
+      signature: json['signature'],
+      attachment: json['attachment'],
       note: json['note'],
       managerId: json['managerId'],
       departmentIds: json['departmentIds'] != null
           ? List<String>.from(json['departmentIds'])
-          : null,
+          : const [],
       teamIds: json['teamIds'] != null
           ? List<String>.from(json['teamIds'])
-          : null,
+          : const [],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
@@ -94,6 +113,8 @@ class UserModelNew {
       'employmentStartDate': employmentStartDate?.toIso8601String(),
       'phone': phone,
       'address': address,
+      'signature': signature,
+      'attachment': attachment,
       'note': note,
       'managerId': managerId,
       'departmentIds': departmentIds,
@@ -115,6 +136,8 @@ class UserModelNew {
       employmentStartDate: employmentStartDate,
       phone: phone,
       address: address,
+      signature: signature,
+      attachment: attachment,
       note: note,
       managerId: managerId,
       departmentIds: departmentIds,
@@ -149,10 +172,12 @@ class CreateUserDto {
   final DateTime? employmentStartDate;
   final String? phone;
   final String? address;
+  final String? signature;
+  final String? attachment;
   final String? note;
   final String? managerId;
-  final List<String>? departmentIds;
-  final List<String>? teamIds;
+  final List<String> departmentIds;
+  final List<String> teamIds;
 
   const CreateUserDto({
     required this.name,
@@ -163,32 +188,31 @@ class CreateUserDto {
     this.employmentStartDate,
     this.phone,
     this.address,
+    this.signature,
+    this.attachment,
     this.note,
     this.managerId,
-    this.departmentIds,
-    this.teamIds,
+    this.departmentIds = const [],
+    this.teamIds = const [],
   });
 
   Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{
-      'name': name,
-      'surname': surname,
-      'email': email,
-      'role': role.value,
-      'companyId': companyId,
+    return {
+      'Name': name,
+      'Surname': surname,
+      'Email': email,
+      'Role': role.value, // Integer role değeri gönder
+      'CompanyId': companyId,
+      'EmploymentStartDate': employmentStartDate?.toUtc().toIso8601String(),
+      'Phone': phone,
+      'Address': address,
+      'Signature': signature,
+      'Attachment': attachment,
+      'Note': note,
+      'ManagerId': managerId,
+      'DepartmentIds': departmentIds,
+      'TeamIds': teamIds,
     };
-
-    if (employmentStartDate != null) {
-      json['employmentStartDate'] = employmentStartDate!.toIso8601String();
-    }
-    if (phone != null) json['phone'] = phone;
-    if (address != null) json['address'] = address;
-    if (note != null) json['note'] = note;
-    if (managerId != null) json['managerId'] = managerId;
-    if (departmentIds != null) json['departmentIds'] = departmentIds;
-    if (teamIds != null) json['teamIds'] = teamIds;
-
-    return json;
   }
 }
 
@@ -202,10 +226,12 @@ class UpdateUserDto {
   final DateTime? employmentStartDate;
   final String? phone;
   final String? address;
+  final String? signature;
+  final String? attachment;
   final String? note;
   final String? managerId;
-  final List<String>? departmentIds;
-  final List<String>? teamIds;
+  final List<String> departmentIds;
+  final List<String> teamIds;
 
   const UpdateUserDto({
     required this.name,
@@ -216,32 +242,31 @@ class UpdateUserDto {
     this.employmentStartDate,
     this.phone,
     this.address,
+    this.signature,
+    this.attachment,
     this.note,
     this.managerId,
-    this.departmentIds,
-    this.teamIds,
+    this.departmentIds = const [],
+    this.teamIds = const [],
   });
 
   Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{
+    return {
       'name': name,
       'surname': surname,
       'email': email,
       'role': role.value,
       'companyId': companyId,
+      'employmentStartDate': employmentStartDate?.toIso8601String(),
+      'phone': phone,
+      'address': address,
+      'signature': signature,
+      'attachment': attachment,
+      'note': note,
+      'managerId': managerId,
+      'departmentIds': departmentIds,
+      'teamIds': teamIds,
     };
-
-    if (employmentStartDate != null) {
-      json['employmentStartDate'] = employmentStartDate!.toIso8601String();
-    }
-    if (phone != null) json['phone'] = phone;
-    if (address != null) json['address'] = address;
-    if (note != null) json['note'] = note;
-    if (managerId != null) json['managerId'] = managerId;
-    if (departmentIds != null) json['departmentIds'] = departmentIds;
-    if (teamIds != null) json['teamIds'] = teamIds;
-
-    return json;
   }
 }
 

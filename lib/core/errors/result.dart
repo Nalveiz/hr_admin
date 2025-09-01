@@ -18,22 +18,35 @@ abstract class Result<T> extends Equatable {
   bool get isFailure => this is Failure<T>;
 
   /// Get data if success, null otherwise
-  T? get data => isSuccess ? (this as Success<T>).value : null;
+  T? get data {
+    if (isSuccess) {
+      final success = this as Success<T>;
+      return success.value;
+    }
+    return null;
+  }
 
   /// Get exception if failure, null otherwise
-  AppException? get exception =>
-      isFailure ? (this as Failure<T>).exception : null;
+  AppException? get exception {
+    if (isFailure) {
+      final failure = this as Failure<T>;
+      return failure.exception;
+    }
+    return null;
+  }
 
   /// Transform success data
   Result<R> map<R>(R Function(T data) transform) {
     if (isSuccess) {
       try {
-        return Result.success(transform(data!));
+        final success = this as Success<T>;
+        return Result.success(transform(success.value));
       } catch (e) {
         return Result.failure(BusinessException(message: e.toString()));
       }
     }
-    return Result.failure(exception!);
+    final failure = this as Failure<T>;
+    return Result.failure(failure.exception);
   }
 
   /// Handle both success and failure cases
@@ -42,7 +55,8 @@ abstract class Result<T> extends Equatable {
     R Function(T data) onSuccess,
   ) {
     if (isSuccess) {
-      return onSuccess(data!);
+      final success = this as Success<T>;
+      return onSuccess(success.value);
     }
     return onFailure(exception!);
   }
@@ -60,6 +74,7 @@ class Success<T> extends Result<T> {
 
 /// Failure result implementation
 class Failure<T> extends Result<T> {
+  @override
   final AppException exception;
 
   const Failure(this.exception);

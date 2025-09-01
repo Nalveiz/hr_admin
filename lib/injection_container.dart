@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Core
 import 'core/services/http_service.dart';
+import 'core/services/error_handling_service.dart';
 import 'core/utils/logger.dart';
 import 'core/theme/theme_cubit.dart';
 
@@ -11,15 +12,14 @@ import 'features/companies/presentation/bloc/companies_cubit.dart';
 import 'features/companies/data/services/company_service.dart';
 
 import 'features/departments/presentation/bloc/departments_cubit.dart';
+import 'features/departments/data/services/department_service.dart';
 import 'features/departments/data/services/department_service_new.dart';
 
 import 'features/teams/presentation/bloc/teams_cubit.dart';
 import 'features/teams/data/services/team_service.dart';
 
 import 'features/users/presentation/cubit/users_cubit.dart';
-import 'features/users/data/services/user_service.dart' as old_user_service;
-import 'features/users/presentation/cubit/users_cubit_new.dart';
-import 'features/users/data/services/user_service_new.dart';
+import 'features/users/data/services/user_service.dart' as user_api;
 import 'features/users/domain/repositories/user_repository.dart';
 import 'features/users/data/repositories/user_repository_impl.dart';
 import 'features/users/domain/services/user_service.dart';
@@ -46,34 +46,40 @@ Future<void> initializeDependencies() async {
   // Core Services
   sl.registerLazySingleton<AppLogger>(() => AppLogger());
   sl.registerLazySingleton<HttpService>(() => HttpService(sl()));
+  sl.registerLazySingleton<ErrorHandlingService>(
+    () => const ErrorHandlingServiceImpl(),
+  );
   sl.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
   sl.registerLazySingleton<SnackBarService>(() => SnackBarServiceImpl());
   sl.registerLazySingleton<DialogService>(() => DialogServiceImpl());
 
   // Data Services
-  sl.registerLazySingleton<AuthService>(() => AuthService(sl()));
-  sl.registerLazySingleton<CompanyService>(() => CompanyService(sl()));
+  sl.registerLazySingleton<AuthService>(() => AuthService(sl(), sl()));
+  sl.registerLazySingleton<CompanyService>(() => CompanyService(sl(), sl()));
+  sl.registerLazySingleton<DepartmentService>(
+    () => DepartmentService(sl(), sl()),
+  );
   sl.registerLazySingleton<DepartmentServiceNew>(
-    () => DepartmentServiceNew(sl()),
+    () => DepartmentServiceNew(sl(), sl()),
   );
-  sl.registerLazySingleton<TeamService>(() => TeamService(sl()));
-  sl.registerLazySingleton<old_user_service.UserService>(
-    () => old_user_service.UserService(sl()),
+  sl.registerLazySingleton<TeamService>(() => TeamService(sl(), sl()));
+  sl.registerLazySingleton<user_api.UserApiService>(
+    () => user_api.UserApiService(sl(), sl()),
   );
-  sl.registerLazySingleton<UserServiceNew>(() => UserServiceNew(sl()));
-  sl.registerLazySingleton<LeaveServiceNew>(() => LeaveServiceNew(sl()));
-  sl.registerLazySingleton<PermitService>(() => PermitService(sl()));
+  sl.registerLazySingleton<LeaveServiceNew>(() => LeaveServiceNew(sl(), sl()));
+  sl.registerLazySingleton<PermitService>(() => PermitService(sl(), sl()));
 
   // Domain Services and Repositories
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(sl()));
   sl.registerLazySingleton<UserService>(() => UserServiceImpl(sl()));
 
   // Presentation Layer (BLoCs/Cubits)
-  sl.registerFactory<AuthBloc>(() => AuthBloc(sl(), sl()));
+  sl.registerFactory<AuthBloc>(() => AuthBloc(sl(), sl(), sl()));
   sl.registerFactory<UsersCubit>(() => UsersCubit(sl()));
-  sl.registerFactory<UsersCubitNew>(() => UsersCubitNew(sl<UserService>()));
   sl.registerFactory<PermissionRequestsCubit>(() => PermissionRequestsCubit());
   sl.registerFactory<CompaniesCubit>(() => CompaniesCubit(sl()));
   sl.registerFactory<TeamsCubit>(() => TeamsCubit(sl()));
-  sl.registerFactory<DepartmentsCubit>(() => DepartmentsCubit(prefs: sl()));
+  sl.registerFactory<DepartmentsCubit>(
+    () => DepartmentsCubit(prefs: sl(), errorHandlingService: sl()),
+  );
 }

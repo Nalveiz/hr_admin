@@ -18,7 +18,7 @@ class DepartmentsPage extends StatefulWidget {
 
 class _DepartmentsPageState extends State<DepartmentsPage> {
   final _searchController = TextEditingController();
-  bool _showActiveOnly = true;
+  bool _showActiveOnly = false;
   String _viewType = 'grid'; // 'grid' or 'list'
 
   @override
@@ -38,7 +38,6 @@ class _DepartmentsPageState extends State<DepartmentsPage> {
       search: _searchController.text.trim().isEmpty
           ? null
           : _searchController.text.trim(),
-      isActive: _showActiveOnly ? true : null,
     );
   }
 

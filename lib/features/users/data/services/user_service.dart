@@ -1,155 +1,172 @@
-import '../../../../core/services/http_service.dart';
-import '../models/user_dto.dart';
-import '../../domain/entities/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/network/base_http_service.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/api_response.dart';
+import '../../../../core/services/error_handling_service.dart';
+import '../models/user_model.dart';
 
-class UserService {
-  final HttpService _httpService;
+/// User API service for handling user operations
+class UserApiService extends BaseHttpService {
+  UserApiService(SharedPreferences prefs, ErrorHandlingService errorHandler)
+    : super(prefs, errorHandler);
 
-  UserService(this._httpService);
+  /// Get all users with optional filtering
+  Future<ApiResponse<List<UserModel>>> getUsers([
+    UserFilterParams? params,
+  ]) async {
+    print('🔍 UserApiService: getUsers called with params: $params');
+    final queryParams = params?.toQueryParameters() ?? {};
+    print('🔍 UserApiService: Query parameters: $queryParams');
 
-  // Helper method to handle response and extract data
-  T _handleResponse<T>(dynamic response, T Function(dynamic) mapper) {
-    if (!response.isSuccess || response.data == null) {
-      throw Exception(
-        'API isteği başarısız: ${response.error?.message ?? "Bilinmeyen hata"}',
-      );
-    }
-    return mapper(response.data);
-  }
+    final response = await get<List<UserModel>>(
+      ApiEndpoints.users,
+      queryParameters: queryParams,
+      fromJson: (json) {
+        print('🔍 UserApiService: Received JSON: $json');
 
-  List<User> _parseUserList(dynamic data) {
-    if (data['items'] != null) {
-      final List<dynamic> items = data['items'];
-      return items.map((json) => User.fromJson(json)).toList();
-    } else if (data is List) {
-      final List<dynamic> items = data;
-      return items.map((json) => User.fromJson(json)).toList();
-    }
-    return [];
-  }
+        // Handle paginated response format
+        if (json is Map<String, dynamic> && json.containsKey('items')) {
+          final items = json['items'];
+          if (items is List) {
+            final users = items
+                .map((item) => UserModel.fromJson(item))
+                .toList();
+            print(
+              '🔍 UserApiService: Parsed ${users.length} users from paginated response',
+            );
+            return users;
+          }
+        }
 
-  // Kullanıcıları listeleme
-  Future<List<User>> getUsers({UserFilterParams? filters}) async {
-    try {
-      final queryParams = filters?.toQueryParameters() ?? {};
-      final stringParams = queryParams.map(
-        (key, value) => MapEntry(key, value.toString()),
-      );
+        // Handle direct array response
+        if (json is List) {
+          final users = json.map((item) => UserModel.fromJson(item)).toList();
+          print(
+            '🔍 UserApiService: Parsed ${users.length} users from direct array',
+          );
+          return users;
+        }
 
-      final response = await _httpService.get(
-        '/user',
-        queryParameters: stringParams,
-      );
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('Kullanıcılar yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // ID ile kullanıcı getirme
-  Future<User?> getUserById(String id) async {
-    try {
-      final response = await _httpService.get('/user/$id');
-      return _handleResponse(response, (data) => User.fromJson(data));
-    } catch (e) {
-      throw Exception('Kullanıcı bilgileri yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // Email ile kullanıcı getirme
-  Future<User?> getUserByEmail(String email) async {
-    try {
-      final response = await _httpService.get('/user/email/$email');
-      return _handleResponse(response, (data) => User.fromJson(data));
-    } catch (e) {
-      throw Exception('Kullanıcı bulunamadı: $e');
-    }
-  }
-
-  // Role göre kullanıcılar
-  Future<List<User>> getUsersByRole(int role) async {
-    try {
-      final response = await _httpService.get('/user/role/$role');
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('Kullanıcılar yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // Şirkete göre kullanıcılar
-  Future<List<User>> getUsersByCompany(String companyId) async {
-    try {
-      final response = await _httpService.get('/user/company/$companyId');
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('Kullanıcılar yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // Yöneticileri getirme
-  Future<List<User>> getManagers() async {
-    try {
-      final response = await _httpService.get('/user/managers');
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('Yöneticiler yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // İK personelini getirme
-  Future<List<User>> getHrUsers() async {
-    try {
-      final response = await _httpService.get('/user/hr');
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('İK personelleri yüklenirken hata oluştu: $e');
-    }
-  }
-
-  // Kullanıcı arama
-  Future<List<User>> searchUsers(String searchTerm) async {
-    try {
-      final response = await _httpService.get(
-        '/user/search',
-        queryParameters: {'searchTerm': searchTerm},
-      );
-      return _handleResponse(response, _parseUserList);
-    } catch (e) {
-      throw Exception('Arama yapılırken hata oluştu: $e');
-    }
-  }
-
-  // Kullanıcı oluşturma
-  Future<User> createUser(CreateUserDto dto) async {
-    try {
-      final response = await _httpService.post('/user', body: dto.toJson());
-      return _handleResponse(response, (data) => User.fromJson(data));
-    } catch (e) {
-      throw Exception('Kullanıcı oluşturulurken hata oluştu: $e');
-    }
-  }
-
-  // Kullanıcı güncelleme
-  Future<User> updateUser(String id, UpdateUserDto dto) async {
-    try {
-      final response = await _httpService.put('/user/$id', body: dto.toJson());
-      return _handleResponse(response, (data) => User.fromJson(data));
-    } catch (e) {
-      throw Exception('Kullanıcı güncellenirken hata oluştu: $e');
-    }
-  }
-
-  // Kullanıcı silme
-  Future<void> deleteUser(String id) async {
-    try {
-      final response = await _httpService.delete('/user/$id');
-      if (!response.isSuccess) {
-        throw Exception(
-          'API isteği başarısız: ${response.error?.message ?? "Bilinmeyen hata"}',
+        print(
+          '🔍 UserApiService: Unexpected JSON format, returning empty list',
         );
-      }
-    } catch (e) {
-      throw Exception('Kullanıcı silinirken hata oluştu: $e');
-    }
+        return <UserModel>[];
+      },
+    );
+
+    print(
+      '🔍 UserApiService: Response - isSuccess: ${response.isSuccess}, data length: ${response.data?.length}, message: ${response.message}',
+    );
+    return response;
+  }
+
+  /// Get user by ID
+  Future<ApiResponse<UserModel>> getUserById(String id) async {
+    return await get<UserModel>(
+      ApiEndpoints.userById(id),
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  /// Get user by email
+  Future<ApiResponse<UserModel>> getUserByEmail(String email) async {
+    return await get<UserModel>(
+      ApiEndpoints.userByEmail(email),
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  /// Get users by role
+  Future<ApiResponse<List<UserModel>>> getUsersByRole(UserRole role) async {
+    return await get<List<UserModel>>(
+      ApiEndpoints.usersByRole(role.value.toString()),
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => UserModel.fromJson(item)).toList();
+        }
+        return <UserModel>[];
+      },
+    );
+  }
+
+  /// Get users by company
+  Future<ApiResponse<List<UserModel>>> getUsersByCompany(
+    String companyId,
+  ) async {
+    return await get<List<UserModel>>(
+      ApiEndpoints.usersByCompany(companyId),
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => UserModel.fromJson(item)).toList();
+        }
+        return <UserModel>[];
+      },
+    );
+  }
+
+  /// Get managers
+  Future<ApiResponse<List<UserModel>>> getManagers() async {
+    return await get<List<UserModel>>(
+      ApiEndpoints.managers,
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => UserModel.fromJson(item)).toList();
+        }
+        return <UserModel>[];
+      },
+    );
+  }
+
+  /// Get HR users
+  Future<ApiResponse<List<UserModel>>> getHRUsers() async {
+    return await get<List<UserModel>>(
+      ApiEndpoints.hrUsers,
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => UserModel.fromJson(item)).toList();
+        }
+        return <UserModel>[];
+      },
+    );
+  }
+
+  /// Search users
+  Future<ApiResponse<List<UserModel>>> searchUsers(String searchTerm) async {
+    return await get<List<UserModel>>(
+      ApiEndpoints.userSearch,
+      queryParameters: {'searchTerm': searchTerm},
+      fromJson: (json) {
+        if (json is List) {
+          return json.map((item) => UserModel.fromJson(item)).toList();
+        }
+        return <UserModel>[];
+      },
+    );
+  }
+
+  /// Create a new user
+  Future<ApiResponse<UserModel>> createUser(CreateUserDto dto) async {
+    return await post<UserModel>(
+      ApiEndpoints.users,
+      data: dto.toJson(),
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  /// Update user
+  Future<ApiResponse<UserModel>> updateUser(
+    String id,
+    UpdateUserDto dto,
+  ) async {
+    return await put<UserModel>(
+      ApiEndpoints.userById(id),
+      data: dto.toJson(),
+      fromJson: (json) => UserModel.fromJson(json),
+    );
+  }
+
+  /// Delete user
+  Future<ApiResponse<void>> deleteUser(String id) async {
+    return await delete<void>(ApiEndpoints.userById(id));
   }
 }

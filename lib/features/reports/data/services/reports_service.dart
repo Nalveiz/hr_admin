@@ -1,10 +1,13 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_response.dart';
 import '../../../../core/network/base_http_service.dart';
+import '../../../../core/services/error_handling_service.dart';
 
 /// Service for reports-related API operations
 class ReportsService extends BaseHttpService {
-  ReportsService(super.prefs);
+  ReportsService(SharedPreferences prefs, ErrorHandlingService errorHandler)
+    : super(prefs, errorHandler);
 
   /// Get user summary report
   Future<ApiResponse<Map<String, dynamic>>> getUserSummaryReport({

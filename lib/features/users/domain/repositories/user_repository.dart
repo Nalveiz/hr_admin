@@ -46,8 +46,8 @@ abstract class UserRepository {
     String? address,
     String? note,
     String? managerId,
-    List<String>? departmentIds,
-    List<String>? teamIds,
+    List<String> departmentIds = const [],
+    List<String> teamIds = const [],
   });
 
   /// Update user
